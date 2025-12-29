@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Penerimaan Murid Baru - KB Harapan Bunda</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary-color: #FFD166;
+            --secondary-color: #118AB2;
+            --accent-color: #EF476F;
+            --text-dark: #073B4C;
+            --bg-color: #F8F9FA;
+            --paper-color: #FFFFFF;
+            --success-color: #06D6A0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .a4-container {
+            background-color: var(--paper-color);
+            width: 100%;
+            max-width: 794px;
+            min-height: 1123px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            border-radius: 10px;
+        }
+        /* HEADER */
+        header {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #FFD93D 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border-bottom: 5px solid var(--accent-color);
+            position: relative;
+            overflow: hidden;
+        }
+        header h1 { font-family: 'Fredoka', sans-serif; font-size: 2.5rem; color: var(--text-dark); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 1; }
+        header h2 { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--secondary-color); margin-bottom: 10px; position: relative; z-index: 1; }
+        header .badge-year { background-color: var(--accent-color); color: white; padding: 5px 20px; border-radius: 50px; font-weight: bold; font-size: 0.9rem; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; z-index: 1; }
+        .decoration-circle { position: absolute; background: rgba(255,255,255,0.3); border-radius: 50%; z-index: 0; }
+        .dc-1 { width: 100px; height: 100px; top: -20px; left: -20px; }
+        .dc-2 { width: 60px; height: 60px; bottom: 20px; right: 10%; }
+
+        /* SECTIONS */
+        .hero-text { text-align: center; margin-bottom: 10px; }
+        .hero-text h3 { font-family: 'Fredoka', sans-serif; color: var(--secondary-color); font-size: 1.8rem; }
+        .hero-text p { color: #666; font-size: 1rem; }
+
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .info-card { background-color: #F0F8FF; padding: 20px; border-radius: 15px; border-left: 5px solid var(--secondary-color); transition: transform 0.2s ease; }
+        .info-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .info-card h4 { color: var(--secondary-color); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .info-card p { font-weight: 600; font-size: 1rem; }
+
+        .gallery-section { text-align: center; }
+        .gallery-title { font-family: 'Fredoka', sans-serif; color: var(--accent-color); margin-bottom: 15px; font-size: 1.5rem; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .photo-frame { position: relative; background-color: #ddd; border-radius: 15px; overflow: hidden; aspect-ratio: 4/3; border: 4px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .photo-frame:hover img { transform: scale(1.1); }
+
+        .requirements { background-color: #FFF9E6; padding: 25px; border-radius: 20px; border: 2px dashed var(--primary-color); }
+        .requirements h3 { text-align: center; font-family: 'Fredoka', sans-serif; color: var(--text-dark); margin-bottom: 20px; font-size: 1.5rem; }
+        .req-list { list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .req-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.95rem; }
+        .req-list li i { color: var(--accent-color); margin-top: 5px; }
+
+        /* BUTTONS */
+        .cta-section { text-align: center; margin-top: auto; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .btn-main {
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            background-color: var(--secondary-color); color: white;
+            text-decoration: none; padding: 15px 40px; border-radius: 50px;
+            font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(17, 138, 178, 0.4); transition: all 0.3s ease;
+            width: 100%; max-width: 400px;
+        }
+        .btn-main:hover { background-color: #0e7294; transform: scale(1.02); }
+        .btn-wa {
+            display: inline-flex; align-items: center; gap: 8px;
+            background-color: transparent; color: #25D366;
+            text-decoration: none; padding: 10px 20px; border-radius: 50px;
+            font-weight: 600; font-size: 1rem; border: 2px solid #25D366;
+            transition: all 0.3s ease;
+        }
+        .btn-wa:hover { background-color: #25D366; color: white; }
+
+        /* FORM */
+        #form-view { display: none; animation: fadeIn 0.5s; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-dark); }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px;
+            font-family: 'Poppins', sans-serif; font-size: 1rem; transition: border 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--secondary-color); outline: none;
+        }
+        .btn-back { background: none; border: none; color: #666; cursor: pointer; font-size: 0.9rem; margin-bottom: 20px; display: flex; align-items: center; gap: 5px; }
+        .btn-back:hover { color: var(--accent-color); }
+        .form-divider { border-bottom: 2px dashed #ddd; margin: 25px 0; position: relative; }
+        .form-divider span { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #888; font-size: 0.8rem; font-weight: bold; }
+        footer { text-align: center; font-size: 0.8rem; color: #888; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            body { padding: 0; background-color: white; }
+            .a4-container { box-shadow: none; padding: 20px; border-radius: 0; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="a4-container">
+        
+        <header>
+            <div class="decoration-circle dc-1"></div>
+            <div class="decoration-circle dc-2"></div>
+            <div style="position: relative; z-index: 1;">
+                <h2>Sistem Penerimaan Murid Baru</h2>
+                <h1>KB Harapan Bunda</h1>
+                <div class="badge-year">Tahun Pelajaran 2026/2027</div>
+                <p>Membentuk Generasi Cerdas, Ceria, dan Berakhlak Mulia</p>
+            </div>
+        </header>
+
+        <div id="brochure-view">
+            <section class="hero-text">
+                <h3>Selamat Datang di KB Harapan Bunda!</h3>
+                <p>Mari bergabung bersama kami. Tempat terbaik bagi Buah Hati untuk belajar, bermain, dan tumbuh kembang dalam lingkungan yang menyenangkan.</p>
+            </section>
+
+            <section class="info-grid" style="margin-top: 20px;">
+                <div class="info-card">
+                    <h4><i class="fas fa-map-marker-alt"></i> Alamat Sekolah</h4>
+                    <p>Wisma Harapan Blok D01/13,<br>Gembor, Periuk - Tangerang</p>
+                </div>
+                <div class="info-card">
+                    <h4><i class="fas fa-calendar-alt"></i> Periode Daftar</h4>
+                    <p>Januari 2026<br><small>Sampai Kuota Terpenuhi</small></p>
+                </div>
+                <div class="info-card">
+                    <h4><i class="fas fa-school"></i> Masuk Sekolah</h4>
+                    <p>Juli 2026</p>
+                </div>
+                <div class="info-card">
+                    <h4><i class="fas fa-phone-alt"></i> Kontak Person</h4>
+                    <p>Rosmalawati<br>0813-9880-2930</p>
+                </div>
+            </section>
+
+            <section class="gallery-section" style="margin-top: 30px;">
+                <h3 class="gallery-title">Galeri Kegiatan Kami</h3>
+                <div class="gallery-grid">
+                    <div class="photo-frame"><img src="https://picsum.photos/seed/kid1/400/300" alt="Kegiatan 1"></div>
+                    <div class="photo-frame"><img src="https://picsum.photos/seed/kid2/400/300" alt="Kegiatan 2"></div>
+                    <div class="photo-frame"><img src="https://picsum.photos/seed/kid3/400/300" alt="Kegiatan 3"></div>
+                </div>
+            </section>
+
+            <section class="requirements" style="margin-top: 30px;">
+                <h3>Syarat Pendaftaran</h3>
+                <ul class="req-list">
+                    <li><i class="fas fa-check-circle"></i> Mengisi Formulir Digital (Klik tombol di bawah)</li>
+                    <li><i class="fas fa-check-circle"></i> Fotocopy KTP Orang Tua atau Wali (2 Lembar)</li>
+                    <li><i class="fas fa-check-circle"></i> Fotocopy Akta Kelahiran & KK (2 Lembar)</li>
+                    <li><i class="fas fa-check-circle"></i> Pas Foto Anak 3x4 (4 Lembar)</li>
+                </ul>
+            </section>
+
+            <section class="cta-section" style="margin-top: 40px;">
+                <button onclick="showForm()" class="btn-main">
+                    <i class="fas fa-edit"></i> Isi Formulir Pendaftaran
+                </button>
+                
+                <a href="https://wa.me/6281398802930?text=Assalamualaikum%20Bunda%20Ros,%20saya%20mau%20tanya%20tentang%20pendaftaran..." class="btn-wa" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Tanya Dulu via WhatsApp
+                </a>
+            </section>
+        </div>
+        
+        <div id="form-view">
+            <button onclick="showBrochure()" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali ke Brosur</button>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 style="font-family: 'Fredoka', sans-serif; color: var(--secondary-color);">Formulir Pendaftaran</h3>
+                <p style="font-size: 0.9rem; color: #666;">Silakan isi data calon siswa dengan benar.</p>
+            </div>
+
+            <form id="spmbForm" name="spmbForm">
+                <div class="form-group">
+                    <label>Nama Lengkap Anak</label>
+                    <input type="text" name="nama" required placeholder="Sesuai Akta Kelahiran">
+                </div>
+
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Tanggal Lahir</label>
+                        <input type="date" name="tgl_lahir" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis Kelamin</label>
+                        <select name="jk" required>
+                            <option value="">Pilih...</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Agama</label>
+                    <select name="agama" required>
+                        <option value="Islam">Islam</option>
+                        <option value="Kristen">Kristen</option>
+                        <option value="Katolik">Katolik</option>
+                        <option value="Hindu">Hindu</option>
+                        <option value="Buddha">Buddha</option>
+                        <option value="Konghucu">Konghucu</option>
+                    </select>
+                </div>
+
+                <div class="form-divider"><span>DATA ORANG TUA</span></div>
+
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Nama Ayah</label>
+                        <input type="text" name="nama_ayah" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pekerjaan Ayah</label>
+                        <input type="text" name="pek_ayah" required>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Nama Ibu</label>
+                        <input type="text" name="nama_ibu" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pekerjaan Ibu</label>
+                        <input type="text" name="pek_ibu" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>No HP Ibu (WhatsApp)</label>
+                    <input type="tel" name="hp_ibu" required placeholder="Contoh: 0813xxxxxxxx">
+                </div>
+
+                <div class="form-group">
+                    <label>Alamat Orang Tua</label>
+                    <textarea name="alamat" rows="3" required placeholder="Alamat lengkap tempat tinggal"></textarea>
+                </div>
+
+                <button type="submit" class="btn-main" style="width: 100%; margin-top: 10px;">
+                    <i class="fas fa-paper-plane"></i> Kirim Data
+                </button>
+            </form>
+            
+            <div id="loading" style="display:none; text-align:center; margin-top:20px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--secondary-color);"></i>
+                <p>Sedang mengirim data...</p>
+            </div>
+        </div>
+        <footer>
+            <p>&copy; 2026 KB Harapan Bunda. Pendidikan Anak Usia Dini.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- KONFIGURASI PENTING ---
+        // Ganti URL di bawah ini dengan URL Web App Google Script Anda
+        // Contoh: 'https://script.google.com/macros/s/AKfycbx.../exec'
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwabhOdrZ1iPlV2FEs_pCti_J7ekcoR8hWyPseCwm7Yqd7tb-LK4he3FHuc5KqLtOKQAg/exec'; 
+
+        // Navigasi
+        function showForm() {
+            document.getElementById('brochure-view').style.display = 'none';
+            document.getElementById('form-view').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function showBrochure() {
+            document.getElementById('form-view').style.display = 'none';
+            document.getElementById('brochure-view').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // Logic Pengiriman Data ke GitHub -> Google Sheet
+        const form = document.forms['spmbForm'];
+        const btn = document.querySelector('button[type="submit"]');
+        const loading = document.getElementById('loading');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            
+            // Validasi URL Script dulu
+            if(scriptURL === 'https://script.google.com/macros/s/AKfycbwabhOdrZ1iPlV2FEs_pCti_J7ekcoR8hWyPseCwm7Yqd7tb-LK4he3FHuc5KqLtOKQAg/exec' || scriptURL === '') {
+                alert("Mohon maaf, sistem sedang maintenance (URL Script belum dipasang).");
+                return;
+            }
+
+            // Tampilkan Loading
+            btn.style.display = 'none';
+            loading.style.display = 'block';
+
+            // Kirim Data menggunakan Fetch API
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(response => {
+                    // Tampilkan Sukses
+                    loading.style.display = 'none';
+                    document.getElementById('form-view').innerHTML = `
+                        <div style="text-align: center; padding: 40px 0;">
+                            <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success-color); margin-bottom: 20px;"></i>
+                            <h3 style="font-family: 'Fredoka', sans-serif;">Terima Kasih!</h3>
+                            <p>Alhamdulillah, data berhasil terkirim! Terima kasih Bunda.</p>
+                            <p>Silakan hubungi Bunda Rosmalawati untuk konfirmasi lebih lanjut.</p>
+                            <a href="https://wa.me/6281398802930" class="btn-wa" style="margin-top: 20px; display:inline-block;">Konfirmasi via WA</a>
+                            <br><br>
+                            <button onclick="window.location.reload()" class="btn-back" style="margin: 0 auto;">Isi Data Lagi</button>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    btn.style.display = 'block';
+                    console.error('Error!', error.message);
+                    alert("Maaf, terjadi kesalahan saat mengirim data. Coba periksa koneksi internet Anda.");
+                });
+        });
+    </script>
+</body>
+</html>
