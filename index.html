@@ -317,11 +317,7 @@
         form.addEventListener('submit', e => {
             e.preventDefault();
             
-            // Validasi URL Script dulu
-            if(scriptURL === 'https://script.google.com/macros/s/AKfycbzPUY0lyHteUrgq0TKhSpUE_OTFbbFFr2P1ihHJ_VI_cnASNvBNb4E2M5GYSJHmwS4X/exec' || scriptURL === '') {
-                alert("Mohon maaf, sistem sedang maintenance (URL Script belum dipasang).");
-                return;
-            }
+            
 
             // Tampilkan Loading
             btn.style.display = 'none';
