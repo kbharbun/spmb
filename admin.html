@@ -115,14 +115,40 @@
                     tbody.innerHTML = '';
                     
                     response.data.forEach(row => {
+                        
+                        // --- LOGIKA WHATSAPP ---
+                        let hpTampil = row.hp;
+                        let btnWA = "";
+
+                        // Pastikan ada nomor HP
+                        if (hpTampil) {
+                            // Ubah 08xxx jadi 628xxx untuk link WA
+                            let hpLink = hpTampil;
+                            if (hpLink.startsWith('0')) {
+                                hpLink = '62' + hpLink.substring(1);
+                            }
+                            
+                            // Buat Tombol WA
+                            btnWA = `
+                                <a href="https://wa.me/${hpLink}" target="_blank" class="btn btn-success btn-sm" style="margin-top:5px;">
+                                    <i class="fab fa-whatsapp"></i> Chat WA
+                                </a>
+                            `;
+                        }
+                        // -----------------------
+
                         tbody.innerHTML += `
                             <tr>
                                 <td>${row.no}</td>
                                 <td>${row.tanggal}</td>
                                 <td class="fw-bold">${row.nama}</td>
                                 <td>${row.jk}</td>
-                                <td>${row.ortu}</td>
-                                <td><span class="badge bg-success">${row.status}</span></td>
+                                <td>
+                                    <strong>${row.nama_ibu}</strong> (Ibu)<br>
+                                    <span class="text-muted"><i class="fas fa-phone"></i> ${hpTampil}</span><br>
+                                    ${btnWA}
+                                </td>
+                                <td><span class="badge bg-primary">${row.status}</span></td>
                             </tr>
                         `;
                     });
