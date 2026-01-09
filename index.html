@@ -306,8 +306,6 @@
                     <textarea name="alamat" rows="3" required placeholder="Alamat lengkap tempat tinggal"></textarea>
                 </div>
 
-                <input type="hidden" name="action" value="simpan_pendaftaran">
-
                 <button type="submit" class="btn-main" style="width: 100%; margin-top: 10px;">
                     <i class="fas fa-paper-plane"></i> Kirim Data
                 </button>
@@ -331,168 +329,175 @@
 
         // --- LOAD KONTEN DINAMIS SAAT HALAMAN DIBUKA ---
         document.addEventListener('DOMContentLoaded', function() {
+            // Tampilkan konten default dulu
+            document.getElementById('loading-page').style.display = 'none';
+            document.getElementById('main-content').style.display = 'flex';
+            
+            // Coba load konten dinamis (jika berhasil, akan update)
             loadDynamicContent();
         });
 
         async function loadDynamicContent() {
             try {
-                // Tampilkan loading
-                document.getElementById('loading-page').style.display = 'block';
-                document.getElementById('main-content').style.display = 'none';
+                // Menggunakan JSONP/CORS Proxy untuk menghindari CORS error
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const targetUrl = scriptURL;
                 
-                // Kirim request ke Google Script untuk mengambil konten
+                // Buat form data
                 const formData = new FormData();
                 formData.append('action', 'ambil_konten_website');
                 
-                const response = await fetch(scriptURL, {
+                const response = await fetch(proxyUrl + targetUrl, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 
                 const data = await response.json();
                 
                 if (data.result === 'success' && data.konten) {
                     updatePageContent(data.konten);
-                } else {
-                    // Gunakan konten default jika gagal
-                    console.log('Menggunakan konten default');
                 }
                 
             } catch (error) {
                 console.log('Gagal memuat konten dinamis:', error);
-                // Tetap tampilkan konten default yang sudah ada di HTML
-            } finally {
-                // Sembunyikan loading dan tampilkan konten
-                document.getElementById('loading-page').style.display = 'none';
-                document.getElementById('main-content').style.display = 'flex';
+                // Tetap gunakan konten default yang sudah ada di HTML
             }
         }
 
         function updatePageContent(konten) {
-            // Update judul halaman
-            document.title = konten.subJudul + ' - ' + konten.judulUtama;
-            document.getElementById('page-title').textContent = konten.subJudul + ' - ' + konten.judulUtama;
-            
-            // Update header
-            document.getElementById('judul-utama').textContent = konten.judulUtama || 'KB Harapan Bunda';
-            document.getElementById('sub-judul').textContent = konten.subJudul || 'Sistem Penerimaan Murid Baru';
-            document.getElementById('tahun-ajaran').textContent = konten.tahunAjaran || 'Tahun Pelajaran 2026/2027';
-            document.getElementById('slogan').textContent = konten.slogan || 'Membentuk Generasi Cerdas, Ceria, dan Berakhlak Mulia';
-            
-            // Update hero text (mendukung HTML)
-            const heroText = konten.heroText || 'Selamat Datang di KB Harapan Bunda!';
-            if (heroText.includes('<')) {
-                document.getElementById('hero-title').innerHTML = heroText;
-            } else {
-                document.getElementById('hero-title').textContent = heroText;
-            }
-            
-            // Update info cards
-            document.getElementById('alamat-sekolah').innerHTML = formatMultilineText(konten.alamatSekolah || 'Wisma Harapan Blok D01/13,<br>Gembor, Periuk - Tangerang');
-            
-            const periode = konten.periodeDaftar || 'Januari 2026';
-            const keterangan = konten.keteranganPeriode || 'Sampai Kuota Terpenuhi';
-            document.getElementById('periode-daftar').innerHTML = periode + '<br><small>' + keterangan + '</small>';
-            
-            document.getElementById('masuk-sekolah').textContent = konten.masukSekolah || 'Juli 2026';
-            
-            const namaKontak = konten.namaKontak || 'Rosmalawati';
-            const nomorKontak = konten.nomorKontak || '0813-9880-2930';
-            document.getElementById('kontak-person').innerHTML = namaKontak + '<br>' + nomorKontak;
-            
-            // Update galeri
-            document.getElementById('judul-galeri').textContent = konten.judulGaleri || 'Galeri Kegiatan Kami';
-            
-            // Update gambar galeri
-            updateGalleryImage('gambar-1', konten.gambar1 || 'https://picsum.photos/seed/kid1/400/300');
-            updateGalleryImage('gambar-2', konten.gambar2 || 'https://picsum.photos/seed/kid2/400/300');
-            updateGalleryImage('gambar-3', konten.gambar3 || 'https://picsum.photos/seed/kid3/400/300');
-            
-            // Update syarat pendaftaran
-            document.getElementById('judul-syarat').textContent = konten.judulSyarat || 'Syarat Pendaftaran';
-            
-            updateSyaratList(konten);
-            
-            // Update tombol
-            const teksTombol = konten.teksTombol || 'Isi Formulir Pendaftaran';
-            document.getElementById('teks-tombol').textContent = teksTombol;
-            
-            // Update link WhatsApp
-            updateWhatsAppLink(konten);
-            
-            // Update footer
-            document.getElementById('footer-text').textContent = konten.footerText || '© 2026 KB Harapan Bunda. Pendidikan Anak Usia Dini.';
-        }
-
-        function formatMultilineText(text) {
-            // Ganti newline dengan <br> untuk multiline text
-            return text.replace(/\n/g, '<br>');
-        }
-
-        function updateGalleryImage(imgId, url) {
-            const imgElement = document.getElementById(imgId);
-            if (imgElement && url) {
-                imgElement.src = url;
-                imgElement.alt = 'Kegiatan ' + imgId.split('-')[1];
+            try {
+                // Update judul halaman
+                if (konten.subJudul && konten.judulUtama) {
+                    document.title = konten.subJudul + ' - ' + konten.judulUtama;
+                }
+                
+                // Update header
+                if (konten.judulUtama) document.getElementById('judul-utama').textContent = konten.judulUtama;
+                if (konten.subJudul) document.getElementById('sub-judul').textContent = konten.subJudul;
+                if (konten.tahunAjaran) document.getElementById('tahun-ajaran').textContent = konten.tahunAjaran;
+                if (konten.slogan) document.getElementById('slogan').textContent = konten.slogan;
+                
+                // Update hero text
+                if (konten.heroText) {
+                    document.getElementById('hero-title').textContent = konten.heroText;
+                }
+                
+                // Update info cards
+                if (konten.alamatSekolah) {
+                    document.getElementById('alamat-sekolah').innerHTML = konten.alamatSekolah.replace(/\n/g, '<br>');
+                }
+                
+                if (konten.periodeDaftar) {
+                    document.getElementById('periode-daftar').innerHTML = konten.periodeDaftar + 
+                        (konten.keteranganPeriode ? '<br><small>' + konten.keteranganPeriode + '</small>' : '');
+                }
+                
+                if (konten.masukSekolah) {
+                    document.getElementById('masuk-sekolah').textContent = konten.masukSekolah;
+                }
+                
+                if (konten.namaKontak || konten.nomorKontak) {
+                    document.getElementById('kontak-person').innerHTML = 
+                        (konten.namaKontak || '') + 
+                        (konten.nomorKontak ? '<br>' + konten.nomorKontak : '');
+                }
+                
+                // Update galeri
+                if (konten.judulGaleri) {
+                    document.getElementById('judul-galeri').textContent = konten.judulGaleri;
+                }
+                
+                // Update gambar galeri
+                if (konten.gambar1) document.getElementById('gambar-1').src = konten.gambar1;
+                if (konten.gambar2) document.getElementById('gambar-2').src = konten.gambar2;
+                if (konten.gambar3) document.getElementById('gambar-3').src = konten.gambar3;
+                
+                // Update syarat pendaftaran
+                if (konten.judulSyarat) {
+                    document.getElementById('judul-syarat').textContent = konten.judulSyarat;
+                }
+                
+                // Update list syarat
+                updateSyaratList(konten);
+                
+                // Update tombol
+                if (konten.teksTombol) {
+                    document.getElementById('teks-tombol').textContent = konten.teksTombol;
+                }
+                
+                // Update link WhatsApp
+                updateWhatsAppLink(konten);
+                
+                // Update footer
+                if (konten.footerText) {
+                    document.getElementById('footer-text').textContent = konten.footerText;
+                }
+                
+            } catch (error) {
+                console.log('Error updating page content:', error);
             }
         }
 
         function updateSyaratList(konten) {
-            const syaratItems = [
-                konten.syarat1 || 'Mengisi Formulir Digital (Klik tombol di bawah)',
-                konten.syarat2 || 'Fotocopy KTP Orang Tua atau Wali (2 Lembar)',
-                konten.syarat3 || 'Fotocopy Akta Kelahiran & KK (2 Lembar)',
-                konten.syarat4 || 'Pas Foto Anak 3x4 (4 Lembar)'
-            ];
-            
-            const listElement = document.getElementById('list-syarat');
-            listElement.innerHTML = '';
-            
-            syaratItems.forEach(syarat => {
-                if (syarat.trim()) {
-                    const li = document.createElement('li');
-                    li.innerHTML = '<i class="fas fa-check-circle"></i> ' + syarat;
-                    listElement.appendChild(li);
+            try {
+                const syaratItems = [
+                    konten.syarat1,
+                    konten.syarat2,
+                    konten.syarat3,
+                    konten.syarat4
+                ].filter(item => item && item.trim() !== '');
+                
+                if (syaratItems.length > 0) {
+                    const listElement = document.getElementById('list-syarat');
+                    listElement.innerHTML = '';
+                    
+                    syaratItems.forEach(syarat => {
+                        const li = document.createElement('li');
+                        li.innerHTML = '<i class="fas fa-check-circle"></i> ' + syarat;
+                        listElement.appendChild(li);
+                    });
                 }
-            });
-            
-            // Jika tidak ada syarat, sembunyikan section
-            if (syaratItems.every(item => !item.trim())) {
-                document.querySelector('.requirements').style.display = 'none';
+            } catch (error) {
+                console.log('Error updating syarat list:', error);
             }
         }
 
         function updateWhatsAppLink(konten) {
-            const waLink = document.getElementById('link-wa');
-            if (!waLink) return;
-            
-            const namaKontak = konten.namaKontak || 'Ros';
-            const nomorKontak = konten.nomorKontak || '081398802930';
-            
-            // Bersihkan nomor dari karakter non-digit
-            const cleanNumber = nomorKontak.replace(/\D/g, '');
-            
-            // Format pesan default
-            const defaultMessage = `Assalamualaikum Bunda ${namaKontak}, saya mau tanya tentang pendaftaran...`;
-            const encodedMessage = encodeURIComponent(defaultMessage);
-            
-            // Buat link WhatsApp
-            let whatsappLink = `https://wa.me/${cleanNumber}`;
-            if (encodedMessage) {
-                whatsappLink += `?text=${encodedMessage}`;
-            }
-            
-            waLink.href = whatsappLink;
-            
-            // Update teks tombol jika ada nama kontak
-            const waText = waLink.querySelector('span') || document.createElement('span');
-            if (!waLink.querySelector('span')) {
-                const icon = waLink.querySelector('i');
+            try {
+                const waLink = document.getElementById('link-wa');
+                if (!waLink || !konten.nomorKontak) return;
+                
+                // Bersihkan nomor dari karakter non-digit
+                const cleanNumber = konten.nomorKontak.replace(/\D/g, '');
+                const namaKontak = konten.namaKontak || 'Admin';
+                
+                // Format pesan default
+                const defaultMessage = `Assalamualaikum Bunda ${namaKontak}, saya mau tanya tentang pendaftaran...`;
+                const encodedMessage = encodeURIComponent(defaultMessage);
+                
+                // Buat link WhatsApp
+                let whatsappLink = `https://wa.me/${cleanNumber}`;
+                if (encodedMessage) {
+                    whatsappLink += `?text=${encodedMessage}`;
+                }
+                
+                waLink.href = whatsappLink;
+                
+                // Update teks tombol
+                const waIcon = waLink.querySelector('i');
                 waLink.innerHTML = '';
-                waLink.appendChild(icon);
-                waLink.appendChild(waText);
+                waLink.appendChild(waIcon);
+                
+                const span = document.createElement('span');
+                span.textContent = ` Tanya Bunda ${namaKontak} via WhatsApp`;
+                waLink.appendChild(span);
+                
+            } catch (error) {
+                console.log('Error updating WhatsApp link:', error);
             }
-            waText.textContent = ` Tanya Bunda ${namaKontak} via WhatsApp`;
         }
 
         // --- FUNGSI NAVIGASI ---
@@ -526,10 +531,20 @@
             loading.style.display = 'block';
             
             try {
-                // Kirim Data menggunakan Fetch API
-                const response = await fetch(scriptURL, { 
+                // Menggunakan proxy untuk menghindari CORS
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                
+                // Tambahkan action ke form data
+                const formData = new FormData(form);
+                formData.append('action', 'simpan_pendaftaran');
+                
+                // Kirim Data menggunakan Fetch API dengan proxy
+                const response = await fetch(proxyUrl + scriptURL, { 
                     method: 'POST', 
-                    body: new FormData(form)
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 
                 const result = await response.json();
@@ -545,11 +560,8 @@
                             <p>Nomor pendaftaran Anda akan diinformasikan via WhatsApp.</p>
                             
                             <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
-                                <a href="https://wa.me/6281398802930" class="btn-wa" style="display: inline-block;">
-                                    <i class="fab fa-whatsapp"></i> Konfirmasi via WhatsApp
-                                </a>
-                                <button onclick="window.location.reload()" class="btn-back" style="margin-top: 10px;">
-                                    <i class="fas fa-redo"></i> Isi Data Lagi
+                                <button onclick="showBrochure()" class="btn-main" style="max-width: 300px;">
+                                    <i class="fas fa-home"></i> Kembali ke Halaman Utama
                                 </button>
                             </div>
                         </div>
@@ -562,7 +574,7 @@
                 loading.style.display = 'none';
                 btn.style.display = 'block';
                 console.error('Error!', error.message);
-                alert("Maaf, terjadi kesalahan saat mengirim data: " + error.message);
+                alert("Maaf, terjadi kesalahan saat mengirim data. Coba lagi atau hubungi admin.");
             }
         });
 
@@ -571,31 +583,26 @@
             const tglLahir = form.tgl_lahir.value;
             const hpIbu = form.hp_ibu.value.trim();
             
-            // Validasi nama tidak kosong
             if (!nama) {
                 alert('Nama anak harus diisi');
                 form.nama.focus();
                 return false;
             }
             
-            // Validasi tanggal lahir
             if (!tglLahir) {
                 alert('Tanggal lahir harus diisi');
                 form.tgl_lahir.focus();
                 return false;
             }
             
-            // Validasi nomor HP
             if (!hpIbu) {
                 alert('Nomor HP Ibu harus diisi');
                 form.hp_ibu.focus();
                 return false;
             }
             
-            // Validasi format nomor HP
-            const hpRegex = /^[0-9]{10,13}$/;
             const cleanHP = hpIbu.replace(/\D/g, '');
-            if (!hpRegex.test(cleanHP)) {
+            if (cleanHP.length < 10 || cleanHP.length > 13) {
                 alert('Nomor HP harus 10-13 digit angka');
                 form.hp_ibu.focus();
                 return false;
@@ -604,19 +611,49 @@
             return true;
         }
 
-        // --- FUNGSI TAMBAHAN UNTUK RELOAD KONTEN (untuk testing) ---
-        function reloadContent() {
-            loadDynamicContent();
+        // Fallback jika proxy tidak tersedia
+        function useDirectGoogleScript() {
+            alert('Menggunakan metode langsung ke Google Script...');
+            // Buat form tersembunyi untuk submit
+            const hiddenForm = document.createElement('form');
+            hiddenForm.method = 'POST';
+            hiddenForm.action = scriptURL;
+            hiddenForm.target = '_blank';
+            hiddenForm.style.display = 'none';
+            
+            // Copy semua data dari form utama
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                const clone = input.cloneNode();
+                if (input.type !== 'submit') {
+                    hiddenForm.appendChild(clone);
+                }
+            });
+            
+            // Tambahkan action
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'simpan_pendaftaran';
+            hiddenForm.appendChild(actionInput);
+            
+            document.body.appendChild(hiddenForm);
+            hiddenForm.submit();
+            
+            // Tampilkan pesan sukses
+            setTimeout(() => {
+                document.getElementById('form-view').innerHTML = `
+                    <div style="text-align: center; padding: 40px 0;">
+                        <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success-color); margin-bottom: 20px;"></i>
+                        <h3 style="font-family: 'Fredoka', sans-serif;">Terima Kasih!</h3>
+                        <p>Formulir telah dikirim. Silakan tutup tab baru yang terbuka.</p>
+                        <button onclick="showBrochure()" class="btn-main" style="margin-top: 20px;">
+                            Kembali ke Halaman Utama
+                        </button>
+                    </div>
+                `;
+            }, 1000);
         }
-
-        // Hotkey untuk reload konten (Ctrl + Shift + R)
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
-                e.preventDefault();
-                reloadContent();
-                alert('Mengambil konten terbaru...');
-            }
-        });
     </script>
 </body>
 </html>
