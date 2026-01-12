@@ -59,6 +59,7 @@
 
         header h2 { font-family: 'Fredoka', sans-serif; color: var(--secondary); font-size: 1.4rem; letter-spacing: 1px; margin-bottom: 5px; position: relative; }
         header h1 { font-family: 'Fredoka', sans-serif; color: var(--dark); font-size: 2.5rem; text-transform: uppercase; margin-bottom: 10px; position: relative; line-height: 1.2; }
+        header h3 { font-family: 'Fredoka', sans-serif; color: var(--secondary); font-size: 1.4rem; letter-spacing: 1px; margin-bottom: 5px; position: relative; }
         .badge { background: var(--accent); color: white; padding: 5px 20px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
 
         /* --- KONTEN UTAMA --- */
@@ -338,6 +339,7 @@
                     // Update Teks (Hanya jika diisi di Admin Panel)
                     if(c.judulUtama) document.getElementById('judul-utama').innerText = c.judulUtama;
                     if(c.subJudul) document.getElementById('sub-judul').innerText = c.subJudul;
+                    if(c.slogan) document.getElementById('slogan').innerText = c.slogan;
                     if(c.tahunAjaran) document.getElementById('tahun-ajaran').innerText = c.tahunAjaran;
                     if(c.heroText) document.getElementById('hero-title').innerText = c.heroText;
                     if(c.alamatSekolah) document.getElementById('alamat-sekolah').innerText = c.alamatSekolah;
