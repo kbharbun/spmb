@@ -10,15 +10,10 @@
     <style>
         :root { --primary: #118AB2; --dark: #073B4C; --light: #F8F9FA; --accent: #EF476F; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background: #f0f2f5; color: var(--dark); }
-        
-        /* LOGIN MODAL */
-        #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; width: 300px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .login-box input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px; }
+        body { background: #f0f2f5; color: var(--dark); padding-bottom: 50px; }
         
         /* LAYOUT */
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: block; }
         header { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; }
@@ -45,29 +40,21 @@
         .btn-save { background: var(--primary); width: 100%; margin-top: 20px; font-size: 1.1rem; }
         .btn-refresh { background: var(--accent); }
         
-        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.8); z-index: 999; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 999; display: none; justify-content: center; align-items: center; flex-direction: column; }
     </style>
 </head>
 <body>
 
-    <div id="login-modal">
-        <div class="login-box">
-            <h3 style="margin-bottom: 10px;">Admin Login</h3>
-            <input type="password" id="pin-input" placeholder="PIN (Default: 1234)">
-            <button class="btn btn-save" onclick="checkLogin()">Masuk</button>
-        </div>
-    </div>
-
     <div class="loading-overlay" id="loading">
         <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
-        <p style="margin-top: 15px; font-weight: bold;">Menghubungkan ke Google Sheet...</p>
+        <p style="margin-top: 15px; font-weight: bold;">Sedang memuat data...</p>
     </div>
 
     <div class="container" id="app">
         <header>
             <div>
                 <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
-                <small>Mode: Google Script Gabungan</small>
+                <small>Tanpa Password</small>
             </div>
             <button class="btn btn-refresh" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh Data</button>
         </header>
@@ -110,7 +97,7 @@
 
         <div id="tab-data" class="panel">
             <h3>Data Pendaftaran Masuk</h3>
-            <p>Data diambil dari Tab: <b>Data_Pendaftaran</b></p>
+            <p>Data diambil dari Tab Google Sheet: <b>Data_Pendaftaran</b></p>
             <p>Total Pendaftar: <span id="total-pendaftar" style="font-weight:bold; color:var(--primary);">0</span></p>
             
             <div class="table-responsive">
@@ -125,22 +112,14 @@
     </div>
 
     <script>
-        // --- KONFIGURASI ---
-        // MASUKKAN URL GOOGLE SCRIPT ANDA DISINI (PASTIKAN SUDAH NEW VERSION)
+        // --- KONFIGURASI URL ---
+        // Pastikan URL ini hasil DEPLOY BARU (New Version > Anyone)
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxObNo1BFGjWUnRnni96YUhjOGipY1lViTfVPfyRZDbhGbuPY6nDNrX2Nu89HxqmBzRhA/exec'; 
-        const ADMIN_PIN = "1234"; 
 
-        // --- AUTH ---
-        function checkLogin() {
-            const pin = document.getElementById('pin-input').value;
-            if(pin === ADMIN_PIN) {
-                document.getElementById('login-modal').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                fetchData();
-            } else {
-                alert('PIN Salah!');
-            }
-        }
+        // --- INIT SAAT WEB DIBUKA ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData(); // Langsung ambil data tanpa login
+        });
 
         function switchTab(tabName) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -155,39 +134,31 @@
             }
         }
 
-        // --- FETCH DATA (BACA) ---
+        // --- FETCH DATA (READ) ---
         async function fetchData() {
             showLoading(true);
             try {
-                // Menggunakan Proxy AllOrigins untuk membaca data JSON
-                const response = await fetch(scriptURL + '?action=ambil_data_siswa', {
-    method: 'GET'
-                
-                const dataWrapper = await response.json();
-                
-                let data;
-                try {
-                    data = JSON.parse(dataWrapper.contents);
-                } catch (e) {
-                    console.error("Bukan JSON:", dataWrapper.contents);
-                    throw new Error("Gagal membaca data JSON. Mungkin masalah permission Script (HTML returned).");
-                }
+                // Fetch Langsung ke Google Script
+                const response = await fetch(scriptURL + '?action=get_admin_data');
+                const data = await response.json();
                 
                 if (data.result === 'success') {
-                    // Isi Form Pengaturan
+                    // Isi Form Pengaturan (Jika ada)
                     if (data.konten) populateSettings(data.konten);
-                    // Isi Tabel Pendaftar
-                    if (data.konten && data.konten.pendaftar) {
+                    // Isi Tabel Pendaftar (Jika ada)
+                    if (data.pendaftar) {
+                        populateTable(data.pendaftar);
+                    } else if (data.konten && data.konten.pendaftar) {
+                        // Jaga-jaga jika struktur JSON berbeda
                         populateTable(data.konten.pendaftar);
                     }
                 } else {
-                    console.error(data);
-                    alert('Gagal mengambil data dari Google Sheet.');
+                    console.error("Result not success:", data);
                 }
 
             } catch (error) {
-                console.error(error);
-                alert('Gagal mengambil data. Pastikan Script di-Deploy sebagai "Anyone" dan Anda bukan di jaringan yang memblokir proxy.');
+                console.error("Error Fetching:", error);
+                // Jangan alert error terus-menerus agar tidak mengganggu jika koneksi lambat
             }
             showLoading(false);
         }
@@ -210,11 +181,12 @@
             tableBody.innerHTML = '';
 
             if (!rows || rows.length === 0) {
-                tableHead.innerHTML = '<tr><th>Tidak ada data</th></tr>';
+                tableHead.innerHTML = '<tr><th>Tidak ada data pendaftar</th></tr>';
+                totalSpan.textContent = '0';
                 return;
             }
 
-            // HEADER (Baris 1)
+            // HEADER (Baris 1 dari Sheet)
             const headers = rows[0];
             let headerHTML = '<tr>';
             headers.forEach(h => headerHTML += `<th>${h}</th>`);
@@ -227,7 +199,7 @@
                 let rowHTML = '<tr>';
                 rows[i].forEach(cell => {
                     let val = cell;
-                    // Format tanggal jika string terlihat seperti tanggal ISO
+                    // Deteksi format tanggal
                     if (typeof cell === 'string' && cell.includes('T') && cell.length > 20) {
                         try { val = new Date(cell).toLocaleDateString('id-ID'); } catch(e){}
                     }
@@ -240,23 +212,24 @@
             totalSpan.textContent = count;
         }
 
-        // --- SIMPAN PENGATURAN (TULIS) ---
+        // --- SIMPAN PENGATURAN (WRITE) ---
         async function saveContent() {
             if(!confirm("Simpan perubahan pengaturan website?")) return;
             showLoading(true);
             
             const form = document.getElementById('contentForm');
             const formData = new FormData(form);
-            // Tambahkan action khusus agar Script tahu ini simpan setting, bukan daftar murid
             formData.append('action', 'simpan_konten');
 
             try {
+                // Mode no-cors agar browser tidak memblokir POST request
                 await fetch(scriptURL, {
                     method: 'POST',
                     body: formData,
                     mode: 'no-cors' 
                 });
 
+                // Karena no-cors tidak mengembalikan respon, kita asumsi sukses jika tidak error network
                 setTimeout(() => {
                     alert('Pengaturan berhasil disimpan!');
                     showLoading(false);
@@ -264,7 +237,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert('Terjadi kesalahan saat menyimpan.');
+                alert('Gagal mengirim data. Cek koneksi internet.');
                 showLoading(false);
             }
         }
