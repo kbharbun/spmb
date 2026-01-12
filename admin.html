@@ -160,11 +160,8 @@
             showLoading(true);
             try {
                 // Menggunakan Proxy AllOrigins untuk membaca data JSON
-                const target = scriptURL + '?action=get_admin_data&t=' + new Date().getTime();
-                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(target);
-                
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error("Gagal koneksi ke Proxy");
+                const response = await fetch(scriptURL + '?action=ambil_data_siswa', {
+    method: 'GET'
                 
                 const dataWrapper = await response.json();
                 
