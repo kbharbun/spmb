@@ -14,18 +14,18 @@
         
         /* LOGIN MODAL */
         #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; width: 300px; }
+        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; width: 300px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .login-box input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px; }
         
         /* LAYOUT */
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: none; }
         header { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .tab-btn.active { background: var(--primary); color: white; }
         
         /* CONTENT EDITOR */
-        .panel { background: white; padding: 30px; border-radius: 10px; display: none; }
+        .panel { background: white; padding: 30px; border-radius: 10px; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .panel.active { display: block; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .form-group { margin-bottom: 15px; }
@@ -34,10 +34,10 @@
         .section-title { grid-column: 1 / -1; margin-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary); }
 
         /* TABLE */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        .table-responsive { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; white-space: nowrap; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: var(--primary); color: white; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; }
         tr:hover { background: #f9f9f9; }
 
         /* BUTTONS */
@@ -52,8 +52,7 @@
 
     <div id="login-modal">
         <div class="login-box">
-            <h3>Admin Login</h3>
-            <p>Masukkan PIN Keamanan</p>
+            <h3 style="margin-bottom: 10px;">Admin Login</h3>
             <input type="password" id="pin-input" placeholder="PIN (Default: 1234)">
             <button class="btn btn-save" onclick="checkLogin()">Masuk</button>
         </div>
@@ -61,107 +60,65 @@
 
     <div class="loading-overlay" id="loading">
         <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
-        <p style="margin-top: 15px; font-weight: bold;">Sedang memproses data...</p>
+        <p style="margin-top: 15px; font-weight: bold;">Menghubungkan ke Google Sheet...</p>
     </div>
 
     <div class="container" id="app">
         <header>
             <div>
-                <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
-                <p>Kelola Konten & Data Murid</p>
+                <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
+                <small>Mode: Google Script Gabungan</small>
             </div>
             <button class="btn btn-refresh" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh Data</button>
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('content')">📝 Edit Website</button>
+            <button class="tab-btn active" onclick="switchTab('content')">📝 Edit Teks Website</button>
             <button class="tab-btn" onclick="switchTab('data')">👥 Data Pendaftar</button>
         </div>
 
         <div id="tab-content" class="panel active">
             <form id="contentForm">
                 <div class="form-grid">
-                    <h3 class="section-title">Header & Judul</h3>
+                    <h3 class="section-title">Informasi Sekolah</h3>
                     <div class="form-group">
-                        <label>Judul Utama (Nama Sekolah)</label>
+                        <label>Judul Utama / Nama Sekolah</label>
                         <input type="text" name="judulUtama">
                     </div>
                     <div class="form-group">
-                        <label>Sub Judul</label>
+                        <label>Sub Judul / Slogan</label>
                         <input type="text" name="subJudul">
                     </div>
                     <div class="form-group">
-                        <label>Tahun Ajaran</label>
+                        <label>Alamat Lengkap</label>
+                        <textarea name="alamatSekolah" rows="3"></textarea>
+                    </div>
+
+                    <h3 class="section-title">Pendaftaran</h3>
+                    <div class="form-group">
+                        <label>Info Tahun Ajaran</label>
                         <input type="text" name="tahunAjaran">
                     </div>
                     <div class="form-group">
-                        <label>Slogan Header</label>
-                        <input type="text" name="slogan">
-                    </div>
-
-                    <h3 class="section-title">Informasi Sekolah</h3>
-                    <div class="form-group">
-                        <label>Hero Title (Teks Besar)</label>
-                        <input type="text" name="heroText">
-                    </div>
-                    <div class="form-group">
-                        <label>Alamat Sekolah</label>
-                        <textarea name="alamatSekolah" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Periode Pendaftaran</label>
-                        <input type="text" name="periodeDaftar">
-                    </div>
-                    <div class="form-group">
-                        <label>Bulan Masuk Sekolah</label>
-                        <input type="text" name="masukSekolah">
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Kontak Person</label>
-                        <input type="text" name="namaKontak">
-                    </div>
-                    <div class="form-group">
-                        <label>Nomor HP/WA (08xxx)</label>
+                        <label>Nomor Kontak (WA)</label>
                         <input type="text" name="nomorKontak">
                     </div>
-
-                    <h3 class="section-title">Gambar (Link URL)</h3>
-                    <div class="form-group">
-                        <label>Gambar Galeri 1</label>
-                        <input type="text" name="gambar1">
-                    </div>
-                    <div class="form-group">
-                        <label>Gambar Galeri 2</label>
-                        <input type="text" name="gambar2">
-                    </div>
-                    <div class="form-group">
-                        <label>Gambar Galeri 3</label>
-                        <input type="text" name="gambar3">
-                    </div>
-
-                    <h3 class="section-title">Lainnya</h3>
-                    <div class="form-group">
-                        <label>Teks Tombol Daftar</label>
-                        <input type="text" name="teksTombol">
-                    </div>
-                    <div class="form-group">
-                        <label>Teks Footer</label>
-                        <input type="text" name="footerText">
-                    </div>
                 </div>
-                <button type="button" onclick="saveContent()" class="btn btn-save"><i class="fas fa-save"></i> Simpan Perubahan Website</button>
+                <button type="button" onclick="saveContent()" class="btn btn-save"><i class="fas fa-save"></i> Simpan Perubahan</button>
             </form>
         </div>
 
         <div id="tab-data" class="panel">
             <h3>Data Pendaftaran Masuk</h3>
-            <p>Total Pendaftar: <span id="total-pendaftar">0</span></p>
+            <p>Data diambil dari Tab: <b>Data_Pendaftaran</b></p>
+            <p>Total Pendaftar: <span id="total-pendaftar" style="font-weight:bold; color:var(--primary);">0</span></p>
+            
             <div class="table-responsive">
                 <table id="dataTable">
                     <thead>
-                        </thead>
-                    <tbody>
-                        </tbody>
+                        <tr><th>Memuat data...</th></tr>
+                    </thead>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -169,8 +126,8 @@
 
     <script>
         // --- KONFIGURASI ---
-        // INI URL SCRIPT ANDA (Sudah saya perbaiki)
-        const scriptURL = 'https://script.googleapis.com/v1/scripts/AKfycbxjjhaSPjwXgdKk0XT4sD8G_UwqUgUIN319n3K2IlkGSOgvtMonpAzsQd82pa7L8No0pA:run'; 
+        // MASUKKAN URL GOOGLE SCRIPT ANDA DISINI (PASTIKAN SUDAH NEW VERSION)
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxBhc1Y9KnmvGkNz8fJr8NS1eL4NZnt6CJn53ykkxQtnHcd04zYtHujYOvmkmVeKoRN/exec'; 
         const ADMIN_PIN = "1234"; 
 
         // --- AUTH ---
@@ -185,7 +142,6 @@
             }
         }
 
-        // --- TABS ---
         function switchTab(tabName) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -199,47 +155,42 @@
             }
         }
 
-        // --- FETCH DATA (READ) ---
+        // --- FETCH DATA (BACA) ---
         async function fetchData() {
             showLoading(true);
             try {
-                // Gunakan Proxy AllOrigins untuk menghindari CORS dan caching
-                // Kita tambahkan parameter timestamp agar tidak dicache
+                // Menggunakan Proxy AllOrigins untuk membaca data JSON
                 const target = scriptURL + '?action=get_admin_data&t=' + new Date().getTime();
                 const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(target);
                 
                 const response = await fetch(proxyUrl);
-                
-                // Cek status koneksi ke proxy
                 if (!response.ok) throw new Error("Gagal koneksi ke Proxy");
                 
                 const dataWrapper = await response.json();
                 
-                // Parsing data asli dari dalam wrapper proxy
-                if (!dataWrapper.contents) throw new Error("Data kosong dari Proxy");
-
-                // INI BAGIAN RAWAN ERROR: Cek apakah isinya HTML atau JSON
                 let data;
                 try {
                     data = JSON.parse(dataWrapper.contents);
                 } catch (e) {
-                    console.error("Isi respons bukan JSON:", dataWrapper.contents);
-                    throw new Error("Google Script mengembalikan HTML (Mungkin permission salah/Login page). Pastikan Deploy Access: Anyone");
+                    console.error("Bukan JSON:", dataWrapper.contents);
+                    throw new Error("Gagal membaca data JSON. Mungkin masalah permission Script (HTML returned).");
                 }
                 
                 if (data.result === 'success') {
+                    // Isi Form Pengaturan
                     if (data.konten) populateSettings(data.konten);
+                    // Isi Tabel Pendaftar
                     if (data.konten && data.konten.pendaftar) {
                         populateTable(data.konten.pendaftar);
                     }
                 } else {
                     console.error(data);
-                    alert('Gagal mengambil data dari Google Sheet. Cek Console untuk detail.');
+                    alert('Gagal mengambil data dari Google Sheet.');
                 }
 
             } catch (error) {
-                console.error('Error Fetch:', error);
-                alert('Gagal: ' + error.message);
+                console.error(error);
+                alert('Gagal mengambil data. Pastikan Script di-Deploy sebagai "Anyone" dan Anda bukan di jaringan yang memblokir proxy.');
             }
             showLoading(false);
         }
@@ -261,23 +212,26 @@
             tableHead.innerHTML = '';
             tableBody.innerHTML = '';
 
-            if (!rows || rows.length === 0) return;
+            if (!rows || rows.length === 0) {
+                tableHead.innerHTML = '<tr><th>Tidak ada data</th></tr>';
+                return;
+            }
 
-            // Baris ke-0 adalah Header
+            // HEADER (Baris 1)
             const headers = rows[0];
             let headerHTML = '<tr>';
             headers.forEach(h => headerHTML += `<th>${h}</th>`);
             headerHTML += '</tr>';
             tableHead.innerHTML = headerHTML;
 
-            // Baris ke-1 dst adalah Data
+            // DATA (Baris 2 dst)
             let count = 0;
             for (let i = 1; i < rows.length; i++) {
                 let rowHTML = '<tr>';
                 rows[i].forEach(cell => {
                     let val = cell;
-                    // Deteksi format tanggal sederhana
-                    if (typeof cell === 'string' && cell.includes('T') && cell.length > 15) {
+                    // Format tanggal jika string terlihat seperti tanggal ISO
+                    if (typeof cell === 'string' && cell.includes('T') && cell.length > 20) {
                         try { val = new Date(cell).toLocaleDateString('id-ID'); } catch(e){}
                     }
                     rowHTML += `<td>${val}</td>`;
@@ -289,33 +243,31 @@
             totalSpan.textContent = count;
         }
 
-        // --- SAVE CONTENT (WRITE) ---
+        // --- SIMPAN PENGATURAN (TULIS) ---
         async function saveContent() {
-            if(!confirm("Simpan perubahan?")) return;
+            if(!confirm("Simpan perubahan pengaturan website?")) return;
             showLoading(true);
             
             const form = document.getElementById('contentForm');
             const formData = new FormData(form);
+            // Tambahkan action khusus agar Script tahu ini simpan setting, bukan daftar murid
             formData.append('action', 'simpan_konten');
 
             try {
-                // Untuk simpan data (POST), kita gunakan mode no-cors
-                // agar tidak diblokir browser.
                 await fetch(scriptURL, {
                     method: 'POST',
                     body: formData,
                     mode: 'no-cors' 
                 });
 
-                // Tunggu sebentar agar sheet terupdate
                 setTimeout(() => {
-                    alert('Data berhasil dikirim ke Google Sheet! Silakan refresh halaman utama website.');
+                    alert('Pengaturan berhasil disimpan!');
                     showLoading(false);
                 }, 2000);
 
             } catch (error) {
                 console.error(error);
-                alert('Terjadi kesalahan saat mengirim.');
+                alert('Terjadi kesalahan saat menyimpan.');
                 showLoading(false);
             }
         }
