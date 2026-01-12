@@ -4,682 +4,317 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - KB Harapan Bunda</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
-        .login-container { max-width: 400px; margin: 100px auto; padding: 30px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .dashboard-container { display: none; padding: 20px; }
-        .card-header { background: #118AB2; color: white; font-weight: bold; }
-        .badge-status { font-size: 0.9em; padding: 5px 10px; }
-        .form-label { font-weight: 600; color: #333; }
-        .image-preview { max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 10px; margin: 10px 0; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav-link.active { background-color: #118AB2 !important; color: white !important; }
+        :root { --primary: #118AB2; --dark: #073B4C; --light: #F8F9FA; --accent: #EF476F; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background: #f0f2f5; color: var(--dark); }
+        
+        /* LOGIN MODAL */
+        #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; width: 300px; }
+        .login-box input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px; }
+        
+        /* LAYOUT */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: none; }
+        header { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        
+        /* CONTENT EDITOR */
+        .panel { background: white; padding: 30px; border-radius: 10px; display: none; }
+        .panel.active { display: block; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: #555; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .section-title { grid-column: 1 / -1; margin-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary); }
+
+        /* TABLE */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: var(--primary); color: white; }
+        tr:hover { background: #f9f9f9; }
+
+        /* BUTTONS */
+        .btn { padding: 10px 25px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; }
+        .btn-save { background: var(--primary); width: 100%; margin-top: 20px; font-size: 1.1rem; }
+        .btn-refresh { background: var(--accent); }
+        
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.8); z-index: 999; display: none; justify-content: center; align-items: center; flex-direction: column; }
     </style>
 </head>
 <body>
 
-    <div id="login-view" class="container">
-        <div class="login-container text-center">
-            <h4 class="mb-4">🔐 Admin Login</h4>
-            <div class="mb-3">
-                <input type="password" id="adminPass" class="form-control" placeholder="Masukkan Password Admin" value="bunda123">
-            </div>
-            <button onclick="loginAdmin()" class="btn btn-primary w-100">Masuk Dashboard</button>
+    <div id="login-modal">
+        <div class="login-box">
+            <h3>Admin Login</h3>
+            <p>Masukkan PIN Keamanan</p>
+            <input type="password" id="pin-input" placeholder="PIN (Default: 1234)">
+            <button class="btn btn-save" onclick="checkLogin()">Masuk</button>
         </div>
     </div>
 
-    <div id="dashboard-view" class="dashboard-container container-fluid">
-        <nav class="navbar navbar-light bg-white shadow-sm mb-4 rounded px-3">
-            <span class="navbar-brand mb-0 h1"><i class="fas fa-user-graduate"></i> Admin Panel KB Harapan Bunda</span>
-            <button onclick="logout()" class="btn btn-outline-danger btn-sm">Keluar</button>
-        </nav>
+    <div class="loading-overlay" id="loading">
+        <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
+        <p style="margin-top: 15px; font-weight: bold;">Sedang memproses data...</p>
+    </div>
 
-        <!-- Tabs Navigation -->
-        <ul class="nav nav-tabs mb-4">
-            <li class="nav-item">
-                <button class="nav-link active" onclick="showTab('data')">Data Pendaftaran</button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" onclick="showTab('edit')">Edit Konten Website</button>
-            </li>
-        </ul>
+    <div class="container" id="app">
+        <header>
+            <div>
+                <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
+                <p>Kelola Konten & Data Murid</p>
+            </div>
+            <button class="btn btn-refresh" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh Data</button>
+        </header>
 
-        <!-- Tab Data Pendaftaran -->
-        <div id="data-tab" class="tab-content active">
-            <div class="card shadow">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Daftar Calon Siswa</span>
-                    <button onclick="loadData()" class="btn btn-light btn-sm"><i class="fas fa-sync"></i> Refresh Data</button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('content')">📝 Edit Website</button>
+            <button class="tab-btn" onclick="switchTab('data')">👥 Data Pendaftar</button>
+        </div>
+
+        <div id="tab-content" class="panel active">
+            <form id="contentForm">
+                <div class="form-grid">
+                    <h3 class="section-title">Header & Judul</h3>
+                    <div class="form-group">
+                        <label>Judul Utama (Nama Sekolah)</label>
+                        <input type="text" name="judulUtama">
+                    </div>
+                    <div class="form-group">
+                        <label>Sub Judul</label>
+                        <input type="text" name="subJudul">
+                    </div>
+                    <div class="form-group">
+                        <label>Tahun Ajaran</label>
+                        <input type="text" name="tahunAjaran">
+                    </div>
+                    <div class="form-group">
+                        <label>Slogan Header</label>
+                        <input type="text" name="slogan">
+                    </div>
+
+                    <h3 class="section-title">Informasi Sekolah</h3>
+                    <div class="form-group">
+                        <label>Hero Title (Teks Besar)</label>
+                        <input type="text" name="heroText">
+                    </div>
+                    <div class="form-group">
+                        <label>Alamat Sekolah</label>
+                        <textarea name="alamatSekolah" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Periode Pendaftaran</label>
+                        <input type="text" name="periodeDaftar">
+                    </div>
+                    <div class="form-group">
+                        <label>Bulan Masuk Sekolah</label>
+                        <input type="text" name="masukSekolah">
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Kontak Person</label>
+                        <input type="text" name="namaKontak">
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor HP/WA (08xxx)</label>
+                        <input type="text" name="nomorKontak">
+                    </div>
+
+                    <h3 class="section-title">Gambar (Link URL)</h3>
+                    <div class="form-group">
+                        <label>Gambar Galeri 1</label>
+                        <input type="text" name="gambar1">
+                    </div>
+                    <div class="form-group">
+                        <label>Gambar Galeri 2</label>
+                        <input type="text" name="gambar2">
+                    </div>
+                    <div class="form-group">
+                        <label>Gambar Galeri 3</label>
+                        <input type="text" name="gambar3">
+                    </div>
+
+                    <h3 class="section-title">Lainnya</h3>
+                    <div class="form-group">
+                        <label>Teks Tombol Daftar</label>
+                        <input type="text" name="teksTombol">
+                    </div>
+                    <div class="form-group">
+                        <label>Teks Footer</label>
+                        <input type="text" name="footerText">
+                    </div>
                 </div>
-                <div class="card-body table-responsive">
-                    <table id="siswaTable" class="table table-hover table-bordered" style="width:100%">
-                        <thead class="table-light">
-                            <tr>
-                                <th>No</th>
-                                <th>Tanggal Daftar</th>
-                                <th>Nama Anak</th>
-                                <th>Jenis Kelamin</th>
-                                <th>Orang Tua / HP</th>
-                                <th>Status</th>
-                            </tr>
+                <button type="button" onclick="saveContent()" class="btn btn-save"><i class="fas fa-save"></i> Simpan Perubahan Website</button>
+            </form>
+        </div>
+
+        <div id="tab-data" class="panel">
+            <h3>Data Pendaftaran Masuk</h3>
+            <p>Total Pendaftar: <span id="total-pendaftar">0</span></p>
+            <div class="table-responsive">
+                <table id="dataTable">
+                    <thead>
                         </thead>
-                        <tbody id="tableBody">
-                            <tr>
-                                <td colspan="6" class="text-center">Klik "Refresh Data" untuk memuat data</td>
-                            </tr>
+                    <tbody>
                         </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Edit Konten -->
-        <div id="edit-tab" class="tab-content">
-            <div class="card shadow">
-                <div class="card-header">Edit Konten Website</div>
-                <div class="card-body">
-                    <form id="editForm">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-heading"></i> Header & Judul</h5>
-                                <div class="mb-3">
-                                    <label class="form-label">Judul Utama</label>
-                                    <input type="text" class="form-control" id="judulUtama" placeholder="KB Harapan Bunda">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Sub Judul</label>
-                                    <input type="text" class="form-control" id="subJudul" placeholder="Sistem Penerimaan Murid Baru">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Tahun Pelajaran</label>
-                                    <input type="text" class="form-control" id="tahunAjaran" placeholder="2026/2027">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Slogan/Moto</label>
-                                    <textarea class="form-control" id="slogan" rows="2">Membentuk Generasi Cerdas, Ceria, dan Berakhlak Mulia</textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Teks Hero/Deskripsi</label>
-                                    <textarea class="form-control" id="heroText" rows="3" placeholder="Selamat datang di sekolah kami..."></textarea>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-info-circle"></i> Informasi Sekolah</h5>
-                                <div class="mb-3">
-                                    <label class="form-label">Alamat Sekolah</label>
-                                    <textarea class="form-control" id="alamatSekolah" rows="3" placeholder="Jl. Contoh No. 123"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Nama Kontak Person</label>
-                                    <input type="text" class="form-control" id="namaKontak" placeholder="Rosmalawati">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Nomor HP Kontak</label>
-                                    <input type="text" class="form-control" id="nomorKontak" placeholder="0813-9880-2930">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Periode Pendaftaran</label>
-                                    <input type="text" class="form-control" id="periodeDaftar" placeholder="Januari 2026">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Masuk Sekolah</label>
-                                    <input type="text" class="form-control" id="masukSekolah" placeholder="Juli 2026">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-images"></i> Galeri Gambar</h5>
-                                <div class="mb-3">
-                                    <label class="form-label">Judul Galeri</label>
-                                    <input type="text" class="form-control" id="judulGaleri" placeholder="Galeri Kegiatan Kami">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">URL Gambar 1</label>
-                                    <div class="input-group">
-                                        <input type="url" class="form-control" id="gambar1" placeholder="https://example.com/gambar1.jpg">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="previewImage('gambar1')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                    <img src="" id="preview1" class="image-preview mt-2" style="display:none;">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">URL Gambar 2</label>
-                                    <div class="input-group">
-                                        <input type="url" class="form-control" id="gambar2" placeholder="https://example.com/gambar2.jpg">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="previewImage('gambar2')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                    <img src="" id="preview2" class="image-preview mt-2" style="display:none;">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">URL Gambar 3</label>
-                                    <div class="input-group">
-                                        <input type="url" class="form-control" id="gambar3" placeholder="https://example.com/gambar3.jpg">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="previewImage('gambar3')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                    <img src="" id="preview3" class="image-preview mt-2" style="display:none;">
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-list-check"></i> Syarat Pendaftaran</h5>
-                                <div class="mb-3">
-                                    <label class="form-label">Judul Syarat</label>
-                                    <input type="text" class="form-control" id="judulSyarat" placeholder="Syarat Pendaftaran">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Syarat 1</label>
-                                    <input type="text" class="form-control" id="syarat1" placeholder="Mengisi Formulir Digital">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Syarat 2</label>
-                                    <input type="text" class="form-control" id="syarat2" placeholder="Fotocopy KTP Orang Tua">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Syarat 3</label>
-                                    <input type="text" class="form-control" id="syarat3" placeholder="Fotocopy Akta Kelahiran">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Syarat 4</label>
-                                    <input type="text" class="form-control" id="syarat4" placeholder="Pas Foto Anak">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Keterangan Periode</label>
-                                    <input type="text" class="form-control" id="keteranganPeriode" placeholder="Sampai Kuota Terpenuhi">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Teks Tombol Pendaftaran</label>
-                                    <input type="text" class="form-control" id="teksTombol" placeholder="Isi Formulir Pendaftaran">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Teks Footer</label>
-                                    <input type="text" class="form-control" id="footerText" placeholder="© 2026 KB Harapan Bunda">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4">
-                            <button type="button" onclick="simpanKonten()" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Simpan Perubahan
-                            </button>
-                            <button type="button" onclick="muatKonten()" class="btn btn-secondary">
-                                <i class="fas fa-redo"></i> Muat Data Saat Ini
-                            </button>
-                            <button type="button" onclick="resetKonten()" class="btn btn-outline-danger">
-                                <i class="fas fa-undo"></i> Reset ke Default
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                </table>
             </div>
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
         // --- KONFIGURASI ---
-        // GANTI DENGAN URL WEB APP ANDA
+        // GANTI INI DENGAN URL SCRIPT ANDA
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzPUY0lyHteUrgq0TKhSpUE_OTFbbFFr2P1ihHJ_VI_cnASNvBNb4E2M5GYSJHmwS4X/exec'; 
-        const PASSWORD_RAHASIA = "bunda123"; 
-
-        // --- LOGIC ---
         
-        // Cek apakah sudah login sebelumnya
-        if(sessionStorage.getItem('isLoggedIn') === 'true') {
-            showDashboard();
-        }
+        // PIN Sederhana (Untuk keamanan dasar saja)
+        const ADMIN_PIN = "1234"; 
 
-        function loginAdmin() {
-            const pass = document.getElementById('adminPass').value;
-            if(pass === PASSWORD_RAHASIA) {
-                sessionStorage.setItem('isLoggedIn', 'true');
-                showDashboard();
+        // --- AUTH ---
+        function checkLogin() {
+            const pin = document.getElementById('pin-input').value;
+            if(pin === ADMIN_PIN) {
+                document.getElementById('login-modal').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                fetchData();
             } else {
-                alert('Password salah, Bunda!');
+                alert('PIN Salah!');
             }
         }
 
-        function logout() {
-            sessionStorage.removeItem('isLoggedIn');
-            location.reload();
-        }
-
-        function showDashboard() {
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('dashboard-view').style.display = 'block';
-            loadData();
-        }
-
-        function showTab(tabName) {
-            // Sembunyikan semua tab
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
+        // --- TABS ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             
-            // Tampilkan tab yang dipilih
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // Update active class pada nav
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Jika tab edit dibuka, load konten
-            if (tabName === 'edit') {
-                muatKonten();
-            }
-        }
-
-        function previewImage(inputId) {
-            const input = document.getElementById(inputId);
-            const previewId = 'preview' + inputId.charAt(inputId.length - 1);
-            const preview = document.getElementById(previewId);
-            
-            if (input.value) {
-                preview.src = input.value;
-                preview.style.display = 'block';
+            if(tabName === 'content') {
+                document.getElementById('tab-content').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
             } else {
-                preview.style.display = 'none';
+                document.getElementById('tab-data').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
             }
         }
 
-        // --- FUNGSI DATA PESERTA (Menggunakan JSONP/Alternatif) ---
-        async function loadData() {
+        // --- FETCH DATA (Settings & Users) ---
+        async function fetchData() {
+            showLoading(true);
             try {
-                document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Memuat data...</td></tr>';
+                // Gunakan Proxy untuk menghindari CORS pada file HTML statis
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
                 
-                // Method 1: Menggunakan Google Script URL langsung dengan parameter
-                const url = `${scriptURL}?action=ambil_data_admin&password=${encodeURIComponent(PASSWORD_RAHASIA)}&callback=?`;
+                const formData = new FormData();
+                formData.append('action', 'get_admin_data');
+
+                const response = await fetch(proxyUrl + scriptURL, {
+                    method: 'POST',
+                    body: formData
+                });
                 
-                // Menggunakan JSONP technique
-                const script = document.createElement('script');
-                script.src = url;
-                document.head.appendChild(script);
+                const data = await response.json();
                 
-                // Fallback setelah 10 detik
-                setTimeout(() => {
-                    if (document.getElementById('tableBody').innerHTML.includes('Memuat data')) {
-                        document.getElementById('tableBody').innerHTML = 
-                            '<tr><td colspan="6" class="text-center text-danger">' +
-                            'Gagal memuat data. Coba metode alternatif.<br>' +
-                            '<button class="btn btn-sm btn-primary mt-2" onclick="loadDataAlternative()">Coba Metode Lain</button>' +
-                            '</td></tr>';
+                if (data.result === 'success') {
+                    // 1. Isi Form Settings
+                    populateSettings(data.konten);
+                    
+                    // 2. Isi Tabel Data
+                    if(data.konten.pendaftar) {
+                        populateTable(data.konten.pendaftar);
                     }
-                }, 10000);
-                
-            } catch (err) {
-                console.error('Error:', err);
-                loadDataAlternative();
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('Gagal mengambil data. Pastikan Script URL benar.');
             }
+            showLoading(false);
         }
 
-        // Callback function untuk JSONP
-        window.handleDataResponse = function(response) {
-            if(response && response.result === 'success') {
-                const tbody = document.getElementById('tableBody');
-                tbody.innerHTML = '';
-                
-                if (!response.data || response.data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Belum ada data pendaftaran</td></tr>';
-                    return;
+        function populateSettings(data) {
+            const form = document.getElementById('contentForm');
+            // Loop semua input dan isi jika key-nya cocok dengan data
+            Array.from(form.elements).forEach(input => {
+                if (input.name && data[input.name]) {
+                    input.value = data[input.name];
                 }
-                
-                response.data.forEach(row => {
-                    let hpTampil = row.hp || '';
-                    let btnWA = "";
+            });
+        }
 
-                    if (hpTampil) {
-                        let hpLink = hpTampil;
-                        if (hpLink.startsWith('0')) {
-                            hpLink = '62' + hpLink.substring(1);
-                        }
-                        
-                        btnWA = `
-                            <a href="https://wa.me/${hpLink}" target="_blank" class="btn btn-success btn-sm mt-1">
-                                <i class="fab fa-whatsapp"></i> Chat WA
-                            </a>
-                        `;
+        function populateTable(rows) {
+            const tableHead = document.querySelector('#dataTable thead');
+            const tableBody = document.querySelector('#dataTable tbody');
+            const totalSpan = document.getElementById('total-pendaftar');
+            
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (!rows || rows.length === 0) return;
+
+            // Baris pertama adalah Header
+            const headers = rows[0];
+            let headerHTML = '<tr>';
+            headers.forEach(h => headerHTML += `<th>${h}</th>`);
+            headerHTML += '</tr>';
+            tableHead.innerHTML = headerHTML;
+
+            // Baris selanjutnya adalah data
+            // Mulai dari index 1 karena index 0 adalah header
+            let count = 0;
+            for (let i = 1; i < rows.length; i++) {
+                let rowHTML = '<tr>';
+                rows[i].forEach(cell => {
+                    // Format tanggal jika perlu
+                    let val = cell;
+                    if (typeof cell === 'string' && cell.includes('T') && cell.length > 20) {
+                        val = new Date(cell).toLocaleDateString('id-ID');
                     }
+                    rowHTML += `<td>${val}</td>`;
+                });
+                rowHTML += '</tr>';
+                tableBody.innerHTML += rowHTML;
+                count++;
+            }
+            totalSpan.textContent = count;
+        }
 
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${row.no || ''}</td>
-                            <td>${row.tanggal || ''}</td>
-                            <td class="fw-bold">${row.nama || ''}</td>
-                            <td>${row.jk || ''}</td>
-                            <td>
-                                <strong>${row.nama_ibu || ''}</strong> (Ibu)<br>
-                                <span class="text-muted"><i class="fas fa-phone"></i> ${hpTampil}</span><br>
-                                ${btnWA}
-                            </td>
-                            <td><span class="badge bg-primary">${row.status || 'BARU'}</span></td>
-                        </tr>
-                    `;
+        // --- SAVE CONTENT ---
+        async function saveContent() {
+            if(!confirm("Anda yakin ingin menyimpan perubahan pada website?")) return;
+            
+            showLoading(true);
+            const form = document.getElementById('contentForm');
+            const formData = new FormData(form);
+            formData.append('action', 'simpan_konten');
+
+            try {
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                
+                const response = await fetch(proxyUrl + scriptURL, {
+                    method: 'POST',
+                    body: formData
                 });
 
-                // Inisialisasi DataTable
-                if ($.fn.DataTable.isDataTable('#siswaTable')) {
-                    $('#siswaTable').DataTable().destroy();
+                const result = await response.json();
+                if(result.result === 'success') {
+                    alert('Berhasil! Perubahan telah disimpan. Silakan refresh halaman index.html Anda.');
+                } else {
+                    alert('Gagal menyimpan.');
                 }
-                $('#siswaTable').DataTable({
-                    language: { 
-                        url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json" 
-                    },
-                    pageLength: 10,
-                    order: [[1, 'desc']]
-                });
-            } else {
-                document.getElementById('tableBody').innerHTML = 
-                    `<tr><td colspan="6" class="text-center text-danger">${response?.message || 'Gagal memuat data'}</td></tr>`;
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan koneksi.');
             }
-        };
-
-        // Metode alternatif menggunakan form submit
-        async function loadDataAlternative() {
-            try {
-                document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Menggunakan metode alternatif...</td></tr>';
-                
-                // Buat form tersembunyi
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = scriptURL;
-                form.target = 'hiddenFrame';
-                form.style.display = 'none';
-                
-                // Tambahkan input
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = 'ambil_data_admin';
-                form.appendChild(actionInput);
-                
-                const passInput = document.createElement('input');
-                passInput.type = 'hidden';
-                passInput.name = 'password';
-                passInput.value = PASSWORD_RAHASIA;
-                form.appendChild(passInput);
-                
-                // Buat iframe tersembunyi
-                let iframe = document.getElementById('hiddenFrame');
-                if (!iframe) {
-                    iframe = document.createElement('iframe');
-                    iframe.name = 'hiddenFrame';
-                    iframe.id = 'hiddenFrame';
-                    iframe.style.display = 'none';
-                    document.body.appendChild(iframe);
-                }
-                
-                // Handle response
-                iframe.onload = function() {
-                    try {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        const responseText = iframeDoc.body.textContent;
-                        const response = JSON.parse(responseText);
-                        window.handleDataResponse(response);
-                    } catch (e) {
-                        document.getElementById('tableBody').innerHTML = 
-                            '<tr><td colspan="6" class="text-center text-danger">' +
-                            'Gagal memuat data. Silakan buka langsung Google Script.<br>' +
-                            '<a href="' + scriptURL + '?action=ambil_data_admin&password=' + PASSWORD_RAHASIA + '" target="_blank" class="btn btn-sm btn-info mt-2">' +
-                            'Buka di Tab Baru</a>' +
-                            '</td></tr>';
-                    }
-                };
-                
-                document.body.appendChild(form);
-                form.submit();
-                setTimeout(() => document.body.removeChild(form), 1000);
-                
-            } catch (err) {
-                console.error('Error metode alternatif:', err);
-                document.getElementById('tableBody').innerHTML = 
-                    '<tr><td colspan="6" class="text-center text-danger">' +
-                    'Gagal memuat data. Coba buka link berikut:<br>' +
-                    '<a href="' + scriptURL + '?action=ambil_data_admin&password=' + PASSWORD_RAHASIA + '" target="_blank">' +
-                    scriptURL + '?action=ambil_data_admin</a>' +
-                    '</td></tr>';
-            }
+            showLoading(false);
         }
 
-        // --- FUNGSI EDIT KONTEN ---
-        async function muatKonten() {
-            try {
-                alert('Memuat konten...');
-                
-                // Menggunakan iframe method untuk konten
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.name = 'kontenFrame';
-                document.body.appendChild(iframe);
-                
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = scriptURL;
-                form.target = 'kontenFrame';
-                form.style.display = 'none';
-                
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = 'ambil_konten';
-                form.appendChild(actionInput);
-                
-                const passInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                passInput.name = 'password';
-                passInput.value = PASSWORD_RAHASIA;
-                form.appendChild(passInput);
-                
-                iframe.onload = function() {
-                    try {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        const responseText = iframeDoc.body.textContent;
-                        const result = JSON.parse(responseText);
-                        
-                        if(result.result === 'success') {
-                            const konten = result.konten || {};
-                            
-                            // Isi form dengan data yang ada
-                            document.getElementById('judulUtama').value = konten.judulUtama || '';
-                            document.getElementById('subJudul').value = konten.subJudul || '';
-                            document.getElementById('tahunAjaran').value = konten.tahunAjaran || '';
-                            document.getElementById('slogan').value = konten.slogan || '';
-                            document.getElementById('heroText').value = konten.heroText || '';
-                            
-                            document.getElementById('alamatSekolah').value = konten.alamatSekolah || '';
-                            document.getElementById('periodeDaftar').value = konten.periodeDaftar || '';
-                            document.getElementById('keteranganPeriode').value = konten.keteranganPeriode || '';
-                            document.getElementById('masukSekolah').value = konten.masukSekolah || '';
-                            document.getElementById('namaKontak').value = konten.namaKontak || '';
-                            document.getElementById('nomorKontak').value = konten.nomorKontak || '';
-                            
-                            document.getElementById('judulGaleri').value = konten.judulGaleri || '';
-                            document.getElementById('gambar1').value = konten.gambar1 || '';
-                            document.getElementById('gambar2').value = konten.gambar2 || '';
-                            document.getElementById('gambar3').value = konten.gambar3 || '';
-                            
-                            document.getElementById('judulSyarat').value = konten.judulSyarat || '';
-                            document.getElementById('syarat1').value = konten.syarat1 || '';
-                            document.getElementById('syarat2').value = konten.syarat2 || '';
-                            document.getElementById('syarat3').value = konten.syarat3 || '';
-                            document.getElementById('syarat4').value = konten.syarat4 || '';
-                            document.getElementById('teksTombol').value = konten.teksTombol || '';
-                            document.getElementById('footerText').value = konten.footerText || '';
-                            
-                            alert('Konten berhasil dimuat!');
-                        } else {
-                            alert('Gagal memuat konten: ' + (result.message || 'Unknown error'));
-                        }
-                    } catch (e) {
-                        alert('Error parsing response: ' + e.message);
-                    }
-                    
-                    document.body.removeChild(iframe);
-                    document.body.removeChild(form);
-                };
-                
-                document.body.appendChild(form);
-                form.submit();
-                
-            } catch (err) {
-                console.error('Error:', err);
-                alert('Gagal memuat konten. Cek koneksi internet.');
-            }
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
         }
-
-        async function simpanKonten() {
-            if (!confirm('Simpan perubahan konten?')) return;
-            
-            try {
-                // Kumpulkan data
-                const data = {
-                    judulUtama: document.getElementById('judulUtama').value,
-                    subJudul: document.getElementById('subJudul').value,
-                    tahunAjaran: document.getElementById('tahunAjaran').value,
-                    slogan: document.getElementById('slogan').value,
-                    heroText: document.getElementById('heroText').value,
-                    alamatSekolah: document.getElementById('alamatSekolah').value,
-                    periodeDaftar: document.getElementById('periodeDaftar').value,
-                    keteranganPeriode: document.getElementById('keteranganPeriode').value,
-                    masukSekolah: document.getElementById('masukSekolah').value,
-                    namaKontak: document.getElementById('namaKontak').value,
-                    nomorKontak: document.getElementById('nomorKontak').value,
-                    judulGaleri: document.getElementById('judulGaleri').value,
-                    gambar1: document.getElementById('gambar1').value,
-                    gambar2: document.getElementById('gambar2').value,
-                    gambar3: document.getElementById('gambar3').value,
-                    judulSyarat: document.getElementById('judulSyarat').value,
-                    syarat1: document.getElementById('syarat1').value,
-                    syarat2: document.getElementById('syarat2').value,
-                    syarat3: document.getElementById('syarat3').value,
-                    syarat4: document.getElementById('syarat4').value,
-                    teksTombol: document.getElementById('teksTombol').value,
-                    footerText: document.getElementById('footerText').value
-                };
-                
-                // Gunakan iframe method
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.name = 'saveFrame';
-                document.body.appendChild(iframe);
-                
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = scriptURL;
-                form.target = 'saveFrame';
-                form.style.display = 'none';
-                
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = 'simpan_konten';
-                form.appendChild(actionInput);
-                
-                const passInput = document.createElement('input');
-                passInput.type = 'hidden';
-                passInput.name = 'password';
-                passInput.value = PASSWORD_RAHASIA;
-                form.appendChild(passInput);
-                
-                const dataInput = document.createElement('input');
-                dataInput.type = 'hidden';
-                dataInput.name = 'data';
-                dataInput.value = JSON.stringify(data);
-                form.appendChild(dataInput);
-                
-                iframe.onload = function() {
-                    try {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        const responseText = iframeDoc.body.textContent;
-                        const result = JSON.parse(responseText);
-                        
-                        if (result.result === 'success') {
-                            alert('Konten berhasil disimpan!');
-                        } else {
-                            alert('Gagal menyimpan: ' + (result.message || 'Unknown error'));
-                        }
-                    } catch (e) {
-                        alert('Error: ' + e.message);
-                    }
-                    
-                    document.body.removeChild(iframe);
-                    document.body.removeChild(form);
-                };
-                
-                document.body.appendChild(form);
-                form.submit();
-                
-            } catch (err) {
-                console.error('Error:', err);
-                alert('Gagal menyimpan konten. Cek koneksi internet.');
-            }
-        }
-
-        function resetKonten() {
-            if (!confirm('Reset semua konten ke default?')) return;
-            
-            // Reset ke nilai default
-            document.getElementById('judulUtama').value = 'KB Harapan Bunda';
-            document.getElementById('subJudul').value = 'Sistem Penerimaan Murid Baru';
-            document.getElementById('tahunAjaran').value = '2026/2027';
-            document.getElementById('slogan').value = 'Membentuk Generasi Cerdas, Ceria, dan Berakhlak Mulia';
-            document.getElementById('heroText').value = 'Selamat Datang di KB Harapan Bunda! Mari bergabung bersama kami. Tempat terbaik bagi Buah Hati untuk belajar, bermain, dan tumbuh kembang dalam lingkungan yang menyenangkan.';
-            
-            document.getElementById('alamatSekolah').value = 'Wisma Harapan Blok D01/13, Gembor, Periuk - Tangerang';
-            document.getElementById('periodeDaftar').value = 'Januari 2026';
-            document.getElementById('keteranganPeriode').value = 'Sampai Kuota Terpenuhi';
-            document.getElementById('masukSekolah').value = 'Juli 2026';
-            document.getElementById('namaKontak').value = 'Rosmalawati';
-            document.getElementById('nomorKontak').value = '0813-9880-2930';
-            
-            document.getElementById('judulGaleri').value = 'Galeri Kegiatan Kami';
-            document.getElementById('gambar1').value = 'https://picsum.photos/seed/kid1/400/300';
-            document.getElementById('gambar2').value = 'https://picsum.photos/seed/kid2/400/300';
-            document.getElementById('gambar3').value = 'https://picsum.photos/seed/kid3/400/300';
-            
-            document.getElementById('judulSyarat').value = 'Syarat Pendaftaran';
-            document.getElementById('syarat1').value = 'Mengisi Formulir Digital (Klik tombol di bawah)';
-            document.getElementById('syarat2').value = 'Fotocopy KTP Orang Tua atau Wali (2 Lembar)';
-            document.getElementById('syarat3').value = 'Fotocopy Akta Kelahiran & KK (2 Lembar)';
-            document.getElementById('syarat4').value = 'Pas Foto Anak 3x4 (4 Lembar)';
-            document.getElementById('teksTombol').value = 'Isi Formulir Pendaftaran';
-            document.getElementById('footerText').value = '© 2026 KB Harapan Bunda. Pendidikan Anak Usia Dini.';
-            
-            // Update preview images
-            ['1','2','3'].forEach(num => {
-                previewImage('gambar' + num);
-            });
-            
-            alert('Konten telah direset ke default');
-        }
-
-        // Event listener untuk input gambar
-        document.addEventListener('DOMContentLoaded', function() {
-            ['gambar1', 'gambar2', 'gambar3'].forEach(id => {
-                const input = document.getElementById(id);
-                if (input) {
-                    input.addEventListener('input', function() {
-                        previewImage(this.id);
-                    });
-                }
-            });
-        });
     </script>
 </body>
 </html>
