@@ -168,153 +168,150 @@
     </div>
 
     <script>
-        // --- KONFIGURASI ---
-        // GANTI INI DENGAN URL SCRIPT ANDA
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxBhc1Y9KnmvGkNz8fJr8NS1eL4NZnt6CJn53ykkxQtnHcd04zYtHujYOvmkmVeKoRN/exec'; 
+    // --- KONFIGURASI ---
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxBhc1Y9KnmvGkNz8fJr8NS1eL4NZnt6CJn53ykkxQtnHcd04zYtHujYOvmkmVeKoRN/exec'; 
+    const ADMIN_PIN = "1234"; 
+
+    // --- AUTH ---
+    function checkLogin() {
+        const pin = document.getElementById('pin-input').value;
+        if(pin === ADMIN_PIN) {
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            fetchData();
+        } else {
+            alert('PIN Salah!');
+        }
+    }
+
+    // --- TABS ---
+    function switchTab(tabName) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         
-        // PIN Sederhana (Untuk keamanan dasar saja)
-        const ADMIN_PIN = "1234"; 
-
-        // --- AUTH ---
-        function checkLogin() {
-            const pin = document.getElementById('pin-input').value;
-            if(pin === ADMIN_PIN) {
-                document.getElementById('login-modal').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                fetchData();
-            } else {
-                alert('PIN Salah!');
-            }
+        if(tabName === 'content') {
+            document.getElementById('tab-content').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        } else {
+            document.getElementById('tab-data').classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
         }
+    }
 
-        // --- TABS ---
-        function switchTab(tabName) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    // --- FETCH DATA (READ menggunakan GET + AllOrigins Proxy) ---
+    async function fetchData() {
+        showLoading(true);
+        try {
+            // Kita gunakan API AllOrigins yang lebih stabil dan GRATIS untuk method GET
+            // URL disusun dengan query string ?action=get_admin_data
+            const target = scriptURL + '?action=get_admin_data';
+            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(target);
             
-            if(tabName === 'content') {
-                document.getElementById('tab-content').classList.add('active');
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            const response = await fetch(proxyUrl);
+            const dataWrapper = await response.json();
+            
+            // AllOrigins membungkus data asli dalam property "contents"
+            // Dan isinya adalah string JSON, jadi harus di-parse lagi
+            const data = JSON.parse(dataWrapper.contents);
+            
+            if (data.result === 'success') {
+                populateSettings(data.konten);
+                if(data.konten.pendaftar) {
+                    populateTable(data.konten.pendaftar);
+                }
             } else {
-                document.getElementById('tab-data').classList.add('active');
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                console.error(data);
+                alert('Gagal mengambil data dari Google Sheet.');
             }
+
+        } catch (error) {
+            console.error('Error Fetch:', error);
+            alert('Gagal koneksi. Cek internet atau URL Script.');
         }
+        showLoading(false);
+    }
 
-        // --- FETCH DATA (Settings & Users) ---
-        async function fetchData() {
-            showLoading(true);
-            try {
-                // Gunakan Proxy untuk menghindari CORS pada file HTML statis
-                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                
-                const formData = new FormData();
-                formData.append('action', 'get_admin_data');
-
-                const response = await fetch(proxyUrl + scriptURL, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.result === 'success') {
-                    // 1. Isi Form Settings
-                    populateSettings(data.konten);
-                    
-                    // 2. Isi Tabel Data
-                    if(data.konten.pendaftar) {
-                        populateTable(data.konten.pendaftar);
-                    }
-                }
-
-            } catch (error) {
-                console.error(error);
-                alert('Gagal mengambil data. Pastikan Script URL benar.');
+    function populateSettings(data) {
+        const form = document.getElementById('contentForm');
+        Array.from(form.elements).forEach(input => {
+            if (input.name && data[input.name]) {
+                input.value = data[input.name];
             }
-            showLoading(false);
-        }
+        });
+    }
 
-        function populateSettings(data) {
-            const form = document.getElementById('contentForm');
-            // Loop semua input dan isi jika key-nya cocok dengan data
-            Array.from(form.elements).forEach(input => {
-                if (input.name && data[input.name]) {
-                    input.value = data[input.name];
+    function populateTable(rows) {
+        const tableHead = document.querySelector('#dataTable thead');
+        const tableBody = document.querySelector('#dataTable tbody');
+        const totalSpan = document.getElementById('total-pendaftar');
+        
+        tableHead.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        if (!rows || rows.length === 0) return;
+
+        // Baris ke-0 adalah Header
+        const headers = rows[0];
+        let headerHTML = '<tr>';
+        headers.forEach(h => headerHTML += `<th>${h}</th>`);
+        headerHTML += '</tr>';
+        tableHead.innerHTML = headerHTML;
+
+        // Baris ke-1 dst adalah Data
+        let count = 0;
+        for (let i = 1; i < rows.length; i++) {
+            let rowHTML = '<tr>';
+            rows[i].forEach(cell => {
+                let val = cell;
+                // Deteksi format tanggal sederhana
+                if (typeof cell === 'string' && cell.includes('T') && cell.length > 15) {
+                    try { val = new Date(cell).toLocaleDateString('id-ID'); } catch(e){}
                 }
+                rowHTML += `<td>${val}</td>`;
             });
+            rowHTML += '</tr>';
+            tableBody.innerHTML += rowHTML;
+            count++;
         }
+        totalSpan.textContent = count;
+    }
 
-        function populateTable(rows) {
-            const tableHead = document.querySelector('#dataTable thead');
-            const tableBody = document.querySelector('#dataTable tbody');
-            const totalSpan = document.getElementById('total-pendaftar');
-            
-            tableHead.innerHTML = '';
-            tableBody.innerHTML = '';
+    // --- SAVE CONTENT (WRITE menggunakan POST no-cors) ---
+    async function saveContent() {
+        if(!confirm("Simpan perubahan?")) return;
+        showLoading(true);
+        
+        const form = document.getElementById('contentForm');
+        const formData = new FormData(form);
+        formData.append('action', 'simpan_konten');
 
-            if (!rows || rows.length === 0) return;
+        try {
+            // Untuk POST (Simpan Data), kita tidak perlu Proxy.
+            // Kita gunakan mode 'no-cors'. Kita tidak bisa membaca respon JSON suksesnya,
+            // tapi data akan tetap tersimpan di Google Sheet.
+            await fetch(scriptURL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // Penting agar tidak diblokir browser
+            });
 
-            // Baris pertama adalah Header
-            const headers = rows[0];
-            let headerHTML = '<tr>';
-            headers.forEach(h => headerHTML += `<th>${h}</th>`);
-            headerHTML += '</tr>';
-            tableHead.innerHTML = headerHTML;
+            // Karena no-cors tidak mengembalikan respon, kita asumsikan sukses
+            // Tunggu 1 detik agar Google Sheet selesai memproses
+            setTimeout(() => {
+                alert('Data berhasil dikirim ke Google Sheet!');
+                showLoading(false);
+            }, 1500);
 
-            // Baris selanjutnya adalah data
-            // Mulai dari index 1 karena index 0 adalah header
-            let count = 0;
-            for (let i = 1; i < rows.length; i++) {
-                let rowHTML = '<tr>';
-                rows[i].forEach(cell => {
-                    // Format tanggal jika perlu
-                    let val = cell;
-                    if (typeof cell === 'string' && cell.includes('T') && cell.length > 20) {
-                        val = new Date(cell).toLocaleDateString('id-ID');
-                    }
-                    rowHTML += `<td>${val}</td>`;
-                });
-                rowHTML += '</tr>';
-                tableBody.innerHTML += rowHTML;
-                count++;
-            }
-            totalSpan.textContent = count;
-        }
-
-        // --- SAVE CONTENT ---
-        async function saveContent() {
-            if(!confirm("Anda yakin ingin menyimpan perubahan pada website?")) return;
-            
-            showLoading(true);
-            const form = document.getElementById('contentForm');
-            const formData = new FormData(form);
-            formData.append('action', 'simpan_konten');
-
-            try {
-                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                
-                const response = await fetch(proxyUrl + scriptURL, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-                if(result.result === 'success') {
-                    alert('Berhasil! Perubahan telah disimpan. Silakan refresh halaman index.html Anda.');
-                } else {
-                    alert('Gagal menyimpan.');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Terjadi kesalahan koneksi.');
-            }
+        } catch (error) {
+            console.error(error);
+            alert('Terjadi kesalahan saat mengirim.');
             showLoading(false);
         }
+    }
 
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'flex' : 'none';
-        }
-    </script>
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'flex' : 'none';
+    }
+</script>
 </body>
 </html>
