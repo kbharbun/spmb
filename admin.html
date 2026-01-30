@@ -8,105 +8,138 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #118AB2; --dark: #073B4C; --light: #F8F9FA; --accent: #EF476F; }
+        :root { --primary: #118AB2; --dark: #073B4C; --light: #F8F9FA; --accent: #EF476F; --success: #06D6A0; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background: #f0f2f5; color: var(--dark); padding-bottom: 50px; }
+        body { background: #f0f2f5; color: var(--dark); padding-bottom: 50px; min-height: 100vh; }
         
         /* LAYOUT */
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: block; }
-        header { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .tab-btn.active { background: var(--primary); color: white; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 20px; }
+        header { background: white; padding: 20px 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        header h2 { color: var(--dark); font-size: 1.5rem; }
         
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
+        .tab-btn { padding: 12px 24px; border: none; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; color: #666; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .tab-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .tab-btn.active { background: var(--primary); color: white; }
+
         /* CONTENT EDITOR */
-        .panel { background: white; padding: 30px; border-radius: 10px; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .panel { background: white; padding: 30px; border-radius: 12px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); animation: fadeIn 0.3s ease; }
         .panel.active { display: block; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: #555; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .section-title { grid-column: 1 / -1; margin-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary); }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; transition: border 0.3s; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(17, 138, 178, 0.1); }
+        .section-title { grid-column: 1 / -1; margin-top: 10px; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; color: var(--primary); font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
 
         /* TABLE */
-        .table-responsive { overflow-x: auto; margin-top: 20px; }
+        .table-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; background: #f8f9fa; padding: 10px 15px; border-radius: 8px; }
+        .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; white-space: nowrap; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: var(--primary); color: white; position: sticky; top: 0; }
-        tr:hover { background: #f9f9f9; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: var(--primary); color: white; font-weight: 600; position: sticky; top: 0; z-index: 10; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #f0f8ff; }
+        
+        /* Highlight Alamat text specifically */
+        td.cell-address { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: normal; }
 
         /* BUTTONS */
-        .btn { padding: 10px 25px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; }
-        .btn-save { background: var(--primary); width: 100%; margin-top: 20px; font-size: 1.1rem; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-save { background: var(--success); width: 100%; margin-top: 20px; font-size: 1rem; justify-content: center; padding: 15px; }
         .btn-refresh { background: var(--accent); }
         
-        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 999; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.95); z-index: 999; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Toast Notification */
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #333; color: white; padding: 12px 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transform: translateY(100px); transition: 0.3s; z-index: 1000; }
+        .toast.show { transform: translateY(0); }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--accent); }
     </style>
 </head>
 <body>
 
+    <!-- LOADING OVERLAY -->
     <div class="loading-overlay" id="loading">
-        <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
-        <p style="margin-top: 15px; font-weight: bold;">Sedang memuat data...</p>
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--primary);"></i>
+        <p style="margin-top: 15px; font-weight: bold; color: var(--dark);">Mengambil data dari server...</p>
     </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Notifikasi</div>
 
     <div class="container" id="app">
         <header>
             <div>
-                <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
+                <h2><i class="fas fa-user-shield" style="color: var(--primary);"></i> Admin Panel</h2>
+                <small style="color: #777;">Kelola Data & Konten Website</small>
             </div>
             <button class="btn btn-refresh" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh Data</button>
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('data')">👥 Data Pendaftar</button>
-            <button class="tab-btn" onclick="switchTab('content')">📝 Edit Website</button>
+            <button class="tab-btn active" onclick="switchTab('data')">
+                <i class="fas fa-users"></i> Data Pendaftar
+            </button>
+            <button class="tab-btn" onclick="switchTab('content')">
+                <i class="fas fa-edit"></i> Edit Website
+            </button>
         </div>
 
+        <!-- PANEL EDIT WEBSITE -->
         <div id="tab-content" class="panel">
             <form id="contentForm">
                 <div class="form-grid">
-                    <h3 class="section-title">Informasi Sekolah</h3>
+                    <h3 class="section-title"><i class="fas fa-school"></i> Informasi Sekolah</h3>
                     <div class="form-group">
-                        <label>Judul Utama/Nama Sekolah</label>
-                        <input type="text" name="judulUtama">
+                        <label>Judul Utama / Nama Sekolah</label>
+                        <input type="text" name="judulUtama" placeholder="Contoh: KB Harapan Bunda">
                     </div>
                     <div class="form-group">
                         <label>Sub Judul</label>
-                        <input type="text" name="subJudul">
+                        <input type="text" name="subJudul" placeholder="Contoh: Sekolah Islam Terpadu">
                     </div>
                     <div class="form-group">
                         <label>Slogan</label>
-                        <input type="text" name="slogan">
+                        <input type="text" name="slogan" placeholder="Mencetak Generasi Cerdas & Berakhlak">
                     </div>
-                    <div class="form-group">
-                        <label>Alamat Lengkap</label>
-                        <textarea name="alamatSekolah" rows="3"></textarea>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Alamat Lengkap Sekolah</label>
+                        <textarea name="alamatSekolah" rows="3" placeholder="Jalan..."></textarea>
                     </div>
 
-                    <h3 class="section-title">Pendaftaran</h3>
+                    <h3 class="section-title"><i class="fas fa-calendar-alt"></i> Pendaftaran</h3>
                     <div class="form-group">
                         <label>Info Tahun Ajaran</label>
-                        <input type="text" name="tahunAjaran">
+                        <input type="text" name="tahunAjaran" placeholder="2024/2025">
                     </div>
                     <div class="form-group">
                         <label>Nomor Kontak (WA)</label>
-                        <input type="text" name="nomorKontak">
+                        <input type="text" name="nomorKontak" placeholder="0812...">
                     </div>
                 </div>
-                <button type="button" onclick="saveContent()" class="btn btn-save"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                <button type="button" onclick="saveContent()" class="btn btn-save">
+                    <i class="fas fa-save"></i> Simpan Perubahan
+                </button>
             </form>
         </div>
 
+        <!-- PANEL DATA PENDAFTAR -->
         <div id="tab-data" class="panel active">
-            <h3>Data Pendaftaran Masuk</h3>
-            <p>Data diambil dari Tab Google Sheet: <b>Data_Pendaftaran</b></p>
-            <p>Total Pendaftar: <span id="total-pendaftar" style="font-weight:bold; color:var(--primary);">0</span></p>
+            <h3 style="margin-bottom: 10px;">Data Pendaftaran Masuk</h3>
+            <div class="table-info">
+                <span><i class="fab fa-google-drive"></i> Sumber: <b>Data_Pendaftaran</b></span>
+                <span>Total: <b id="total-pendaftar" style="color: var(--primary);">0</b> Pendaftar</span>
+            </div>
             
             <div class="table-responsive">
                 <table id="dataTable">
                     <thead>
-                        <tr><th>Memuat data...</th></tr>
+                        <tr><th>Menunggu data...</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -121,7 +154,7 @@
 
         // --- INIT SAAT WEB DIBUKA ---
         document.addEventListener('DOMContentLoaded', () => {
-            fetchData(); // Langsung ambil data tanpa login
+            fetchData();
         });
 
         function switchTab(tabName) {
@@ -137,31 +170,43 @@
             }
         }
 
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast show ${type}`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
         // --- FETCH DATA (READ) ---
         async function fetchData() {
             showLoading(true);
             try {
-                // Fetch Langsung ke Google Script
                 const response = await fetch(scriptURL + '?action=get_admin_data');
+                if(!response.ok) throw new Error("Gagal terkoneksi ke Google Script");
+                
                 const data = await response.json();
                 
                 if (data.result === 'success') {
-                    // Isi Form Pengaturan (Jika ada)
                     if (data.konten) populateSettings(data.konten);
-                    // Isi Tabel Pendaftar (Jika ada)
+                    
                     if (data.pendaftar) {
                         populateTable(data.pendaftar);
                     } else if (data.konten && data.konten.pendaftar) {
-                        // Jaga-jaga jika struktur JSON berbeda
                         populateTable(data.konten.pendaftar);
+                    } else {
+                        // Data kosong tapi sukses
+                        populateTable([]);
                     }
                 } else {
-                    console.error("Result not success:", data);
+                    console.error("Script Error:", data);
+                    showToast("Gagal memuat data: " + (data.message || "Unknown Error"), 'error');
                 }
 
             } catch (error) {
                 console.error("Error Fetching:", error);
-                // Jangan alert error terus-menerus agar tidak mengganggu jika koneksi lambat
+                showToast("Terjadi kesalahan jaringan.", 'error');
+                // Tampilkan tabel kosong agar tidak hang
+                document.querySelector('#dataTable thead').innerHTML = '<tr><th>Gagal memuat data</th></tr>';
             }
             showLoading(false);
         }
@@ -175,6 +220,7 @@
             });
         }
 
+        // --- FUNGSI UTAMA PERBAIKAN: POPULATE TABLE ---
         function populateTable(rows) {
             const tableHead = document.querySelector('#dataTable thead');
             const tableBody = document.querySelector('#dataTable tbody');
@@ -184,30 +230,62 @@
             tableBody.innerHTML = '';
 
             if (!rows || rows.length === 0) {
-                tableHead.innerHTML = '<tr><th>Tidak ada data pendaftar</th></tr>';
+                tableHead.innerHTML = '<tr><th>Belum ada data pendaftar masuk</th></tr>';
                 totalSpan.textContent = '0';
                 return;
             }
 
-            // HEADER (Baris 1 dari Sheet)
+            // 1. HEADER (Asumsi Baris pertama adalah Judul Kolom)
             const headers = rows[0];
             let headerHTML = '<tr>';
             headers.forEach(h => headerHTML += `<th>${h}</th>`);
             headerHTML += '</tr>';
             tableHead.innerHTML = headerHTML;
 
-            // DATA (Baris 2 dst)
+            // 2. DATA (Baris kedua dst)
             let count = 0;
             for (let i = 1; i < rows.length; i++) {
                 let rowHTML = '<tr>';
-                rows[i].forEach(cell => {
+                
+                // Loop setiap kolom dalam baris
+                rows[i].forEach((cell, index) => {
                     let val = cell;
-                    // Deteksi format tanggal
-                    if (typeof cell === 'string' && cell.includes('T') && cell.length > 20) {
-                        try { val = new Date(cell).toLocaleDateString('id-ID'); } catch(e){}
+                    
+                    // Penanganan Data Kosong
+                    if (!val) {
+                        val = "<span style='color:#ccc; font-style:italic;'>-</span>";
+                    } 
+                    // Penanganan Tanggal (Date Handling yang lebih aman)
+                    else if (typeof cell === 'string') {
+                        // Regex untuk mendeteksi format ISO Date Google Sheet: 2023-10-25T10:00:00...
+                        const isoDatePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+                        
+                        if (isoDatePattern.test(cell)) {
+                            const dateObj = new Date(cell);
+                            // Cek apakah date valid (bukan Invalid Date)
+                            if (!isNaN(dateObj.getTime())) {
+                                // Format tanggal Indonesia
+                                const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                                val = dateObj.toLocaleDateString('id-ID', options);
+                            } else {
+                                // Jika parsing gagal, kembalikan ke string asli (untuk menghindari tulisan "Invalid Date")
+                                val = cell; 
+                            }
+                        } else {
+                            // Jika bukan tanggal, biarkan teks apa adanya (Alamat, Nama, dll)
+                            val = cell;
+                        }
                     }
-                    rowHTML += `<td>${val}</td>`;
+                    
+                    // Cek khusus jika header kolom ini mengandung kata "Alamat" untuk styling opsional
+                    let colClass = "";
+                    if (headers[index] && headers[index].toLowerCase().includes('alamat')) {
+                        colClass = "cell-address";
+                    }
+
+                    rowHTML += `<td class="${colClass}">${val}</td>`;
                 });
+                
                 rowHTML += '</tr>';
                 tableBody.innerHTML += rowHTML;
                 count++;
@@ -217,30 +295,29 @@
 
         // --- SIMPAN PENGATURAN (WRITE) ---
         async function saveContent() {
-            if(!confirm("Simpan perubahan pengaturan website?")) return;
-            showLoading(true);
+            if(!confirm("Apakah Anda yakin ingin menyimpan perubahan pengaturan website?")) return;
             
+            showLoading(true);
             const form = document.getElementById('contentForm');
             const formData = new FormData(form);
             formData.append('action', 'simpan_konten');
 
             try {
-                // Mode no-cors agar browser tidak memblokir POST request
                 await fetch(scriptURL, {
                     method: 'POST',
                     body: formData,
                     mode: 'no-cors' 
                 });
 
-                // Karena no-cors tidak mengembalikan respon, kita asumsi sukses jika tidak error network
+                // Karena no-cors, kita asumsi sukses jika tidak ada error jaringan
                 setTimeout(() => {
-                    alert('Pengaturan berhasil disimpan!');
+                    showToast('Pengaturan berhasil disimpan!');
                     showLoading(false);
-                }, 2000);
+                }, 1500);
 
             } catch (error) {
                 console.error(error);
-                alert('Gagal mengirim data. Cek koneksi internet.');
+                showToast('Gagal mengirim data. Cek koneksi internet.', 'error');
                 showLoading(false);
             }
         }
