@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPMB Online - KB Harapan Bunda</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Konfigurasi Tema & Animasi -->
     <script>
         tailwind.config = {
             theme: {
@@ -91,279 +87,242 @@
         
         /* 3x4 Photo Frame Styles */
         .photo-frame-3x4 {
-            width: 135px; 
-            height: 180px; 
-            background-color: #f9fafb;
+            width: 150px; 
+            height: 200px; /* Rasio 3:4 */
+            background-color: #f3f4f6;
             border: 2px dashed #cbd5e1; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border-radius: 4px; 
+            border-radius: 8px; 
         }
-        .photo-frame-3x4::after {
-            content: 'Tempel Foto 3x4';
-            position: absolute;
-            bottom: 5px;
-            font-size: 9px;
-            color: #9ca3af;
-            font-weight: bold;
-            background: rgba(255,255,255,0.9);
-            padding: 2px 4px;
-            border-radius: 2px;
-        }
-
-                /* --- PRINT STYLES --- */
-        /* Helper: Sembunyikan elemen print di layar */
-        .print\:block { 
-            display: none; 
-        }
-
+        
+        /* --- REFACTORED PRINT STYLES --- */
         @media print {
-            @page { margin: 0; size: A4; }
+            @page { margin: 1cm; size: A4; }
+            
+            /* Reset Body */
             body { 
-                background: white; 
+                background: white !important; 
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact; 
+                color: black !important;
+                font-family: 'Times New Roman', Times, serif !important; /* Font formal untuk print */
             }
             
-            /* Tampilkan elemen print saat diprint */
-            .print\:block { 
-                display: block !important; 
-            }
+            /* Hide UI Elements */
+            nav, footer, #loadingOverlay, .no-print { display: none !important; }
+            
+            /* Hide Main Pages */
+            #page-home, #page-register, #page-admin-login, #page-admin-dashboard { display: none !important; }
 
-            /* Sembunyikan elemen ini saat diprint */
-            nav, footer, #page-home, #page-register, #page-admin-login, #page-admin-dashboard, .no-print {
-                display: none !important;
-            }
-
+            /* Setup Modal for Print */
             #modal-detail {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100vh;
-                background: white;
-                z-index: 9999;
+                position: static !important;
                 display: block !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                z-index: 9999;
             }
             #modal-backdrop { display: none !important; }
-
             #modal-content {
-                box-shadow: none;
-                transform: none !important;
-                width: 100%;
-                max-width: 100%;
-                height: 100%;
-                max-height: 100%;
-                border-radius: 0;
-                overflow: visible;
-                padding: 40px;
-            }
-            
-            #modal-content > div:first-child {
-                background: white !important;
-                color: black !important;
-                border-bottom: 2px solid #000 !important;
-                padding: 0 0 20px 0 !important;
-                margin-bottom: 30px !important;
-                display: flex !important;
-                justify-content: flex-end; /* Tombol close di kanan */
-            }
-            #modal-content > div:first-child div { display: none; } /* Hapus teks header via CSS */
-            #modal-content > div:first-child button { 
-                display: none; /* Sembunyikan tombol X saat print */
-            }
-
-            #modal-content > div:nth-child(2) {
-                display: flex !important;
-                /* PERUBAHAN: Balik urutan jadi Kanan (Data) - Kiri (Foto) */
-                flex-direction: row-reverse !important; 
-                gap: 40px !important;
-            }
-            
-            .photo-frame-3x4 {
-                border: 2px solid #000 !important; 
-                width: 140px;
-                height: 187px; 
-                background: #fff !important;
                 box-shadow: none !important;
-            }
-            .photo-frame-3x4::after {
-                color: #000; 
-                background: none;
-            }
-
-            #modal-content > div:last-child {
-                display: none !important;
+                transform: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
             }
 
-            .text-gray-400, .text-gray-500 { color: #000 !important; }
-            .text-brand-pink, .text-brand-blue { color: #000 !important; }
+            /* Print Specific Adjustments */
+            .print-hidden { display: none !important; }
+            .print-show { display: block !important; }
+            
+            /* Frame Foto di Print */
+            .photo-frame-3x4 {
+                border: 1px solid #000 !important;
+                border-radius: 0 !important;
+                width: 3cm !important;
+                height: 4cm !important;
+                background: white !important;
+            }
+
+            /* Layout Grid Print */
+            .print-layout-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 140px !important; /* Data kiri, Foto kanan */
+                gap: 20px;
+                align-items: start;
+            }
+
+            /* Hapus background warna warni di print */
+            .bg-gray-50, .bg-yellow-50, .bg-brand-blue {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+            .text-white { color: black !important; }
+            
+            /* Border bawah untuk header print */
+            .print-border-bottom {
+                border-bottom: 2px solid black !important;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+
+            /* Tanda Tangan Section */
+            .signature-section {
+                display: flex !important;
+                justify-content: space-between;
+                margin-top: 50px;
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
 <body class="font-body gradient-bg text-gray-700 min-h-screen relative overflow-x-hidden">
 
-    <!-- LOADING OVERLAY -->
     <div id="loadingOverlay" class="fixed inset-0 loading-overlay z-[100] hidden flex-col justify-center items-center">
         <div class="w-16 h-16 border-4 border-brand-pink/20 border-t-brand-pink rounded-full animate-spin mb-4"></div>
         <h3 id="loading-text" class="text-xl font-heading font-bold text-brand-blue animate-pulse">Sedang Mengirim Data...</h3>
         <p class="text-sm text-gray-500">Mohon jangan tutup halaman ini.</p>
     </div>
 
-    <!-- MODAL DETAIL SISWA -->
     <div id="modal-detail" class="fixed inset-0 z-[60] hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop"></div>
         
         <div class="absolute inset-0 flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modal-content">
                 
-                <!-- Modal Header -->
                 <div class="bg-brand-blue text-white p-6 rounded-t-3xl flex justify-between items-center sticky top-0 z-10 no-print">
                     <div>
-                        <!-- Teks Detail Pendaftar & Data lengkap calon siswa DIHAPUS DISINI -->
+                        <h2 class="font-heading text-2xl font-bold">📄 Detail Siswa</h2>
+                        <p class="text-blue-100 text-sm">Data lengkap calon peserta didik.</p>
                     </div>
                     <button onclick="closeModal()" class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition w-10 h-10 flex items-center justify-center">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
 
-                <!-- Modal Body (Print Area) -->
+                <div class="hidden print-show text-center print-border-bottom mb-6">
+                    <h1 class="text-3xl font-bold uppercase tracking-wider mb-1">KB Harapan Bunda</h1>
+                    <p class="text-sm">Wisma Harapan Blok D01/13, Gembor - Tangerang</p>
+                    <p class="text-sm">Telp/WA: 0813-9880-2930</p>
+                    <div class="mt-4 border-t-2 border-black w-full"></div>
+                    <div class="mt-1 border-t border-black w-full"></div>
+                    <h2 class="text-xl font-bold uppercase mt-6 underline decoration-2 underline-offset-4">Bukti Pendaftaran Siswa Baru</h2>
+                </div>
+
                 <div class="p-8">
-                    <div class="flex flex-col md:flex-row gap-8">
+                    <div class="flex flex-col md:flex-row gap-8 print-layout-grid">
                         
-                        <!-- Kolom Kiri: Foto -->
-                        <!-- Print: Pindah ke kanan karena CSS flex-direction: row-reverse -->
-                        <div class="flex flex-col items-center gap-4 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-gray-100 pb-8 md:pb-0 md:pr-8 print:border-r-0 print:border-l print:border-gray-200 print:pl-8 print:pr-0">
-                            <div class="font-bold text-gray-800 mb-2 no-print">Preview Foto</div>
-                            
-                            <!-- Frame Foto 3x4 -->
-                            <div class="photo-frame-3x4 bg-gray-100 group">
+                        <div class="flex flex-col items-center md:w-auto md:order-1 print:order-2">
+                            <div class="photo-frame-3x4 group mb-3 shadow-inner">
                                 <img id="detail-foto" src="" alt="Foto Siswa" class="w-full h-full object-cover hidden">
                                 <div id="detail-foto-placeholder" class="text-gray-400 flex flex-col items-center">
                                     <i class="fas fa-user text-4xl mb-2"></i>
-                                    <span class="text-xs text-center px-2 leading-tight">Tempel<br>Foto<br>Disini</span>
+                                    <span class="text-xs text-center px-2 leading-tight">Tempel<br>Foto 3x4<br>Disini</span>
                                 </div>
                             </div>
-                            
-                            <!-- AREA PREVIEW -->
-                            <div class="text-center w-full no-print">
-                                <h3 id="detail-nama" class="font-heading text-xl font-bold text-gray-800 leading-tight">Nama Anak</h3>
-                                <p id="detail-id" class="text-xs text-gray-500 mt-1">ID: -</p>
+                            <div class="text-center no-print">
+                                <p class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Preview Foto</p>
                             </div>
                         </div>
 
-                        <!-- Kolom Kanan: Data Lengkap -->
-                        <!-- Print: Pindah ke kiri karena CSS flex-direction: row-reverse -->
-                        <div class="w-full md:w-3/4 space-y-6">
+                        <div class="w-full md:order-2 print:order-1 space-y-6">
                             
-                            <!-- Header Print -->
-                            <div class="hidden print:block text-center mb-6">
-                                <h1 class="text-2xl font-bold uppercase">Bukti Pendaftaran Siswa Baru</h1>
-                                <p class="text-sm">KB Harapan Bunda - Tahun Ajaran 2026/2027</p>
-                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-brand-blue border-b-2 border-brand-blue/20 pb-2 mb-4 print:text-black print:border-black uppercase">
+                                    A. Identitas Anak
+                                </h3>
+                                <div class="grid grid-cols-[140px_1fr] gap-y-3 text-sm">
+                                    <div class="text-gray-500 font-semibold print:text-black">No. ID</div>
+                                    <div id="detail-id" class="font-bold text-gray-800 print:text-black">: -</div>
 
-                            <!-- Identitas Singkat -->
-                            <!-- GARIS MELINTANG (border-b-2 border-black) DIHAPUS DISINI -->
-                            <div class="grid grid-cols-2 gap-4 pb-4 mb-4 print:flex print:justify-between print:items-end">
-                                <div>
-                                    <p class="text-xs text-gray-500 no-print">Nama Lengkap</p>
-                                    <p class="font-heading text-xl font-bold text-gray-800 print:text-lg print:font-bold print:text-black" id="detail-nama-print">Nama Anak</p>
-                                    <p class="text-sm text-gray-600" id="detail-id-print">ID: -</p>
-                                </div>
-                                <div class="text-right">
-                                    <div class="flex justify-end gap-2 mb-1">
-                                        <span id="detail-jk" class="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs font-bold rounded">L/P</span>
-                                        <span id="detail-umur" class="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs font-bold rounded">0 Th</span>
-                                    </div>
-                                </div>
-                            </div>
+                                    <div class="text-gray-500 font-semibold print:text-black">Nama Lengkap</div>
+                                    <div id="detail-nama" class="font-bold text-xl text-brand-pink print:text-black print:text-lg">: -</div>
 
-                            <!-- Data Anak -->
-                            <div class="bg-gray-50 p-4 rounded-2xl print:bg-white print:p-0 print:rounded-none">
-                                <h4 class="font-bold text-brand-pink mb-3 text-sm uppercase tracking-wide no-print">👶 Data Diri Anak</h4>
-                                <h4 class="font-bold border-b border-black mb-3 text-sm uppercase tracking-wide hidden print:block">A. Data Diri Anak</h4>
-                                
-                                <div class="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <p class="text-gray-400 text-xs no-print">Tanggal Lahir</p>
-                                        <p class="text-gray-500 text-xs print:block print:mb-1">Tanggal Lahir</p>
-                                        <p id="detail-tgl-lahir" class="font-semibold text-gray-700">-</p>
+                                    <div class="text-gray-500 font-semibold print:text-black">Jenis Kelamin</div>
+                                    <div id="detail-jk" class="font-semibold text-gray-800 print:text-black">: -</div>
+
+                                    <div class="text-gray-500 font-semibold print:text-black">Tanggal Lahir</div>
+                                    <div class="flex gap-2">
+                                        : <span id="detail-tgl-lahir" class="font-semibold text-gray-800 print:text-black">-</span>
+                                        <span id="detail-umur" class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded print:hidden">- Th</span>
+                                        <span id="detail-umur-print" class="hidden print:inline font-normal text-sm"> (Usia: - )</span>
                                     </div>
-                                    <div>
-                                        <p class="text-gray-400 text-xs no-print">Agama</p>
-                                        <p class="text-gray-500 text-xs print:block print:mb-1">Agama</p>
-                                        <p id="detail-agama" class="font-semibold text-gray-700">-</p>
-                                    </div>
+
+                                    <div class="text-gray-500 font-semibold print:text-black">Agama</div>
+                                    <div id="detail-agama" class="font-semibold text-gray-800 print:text-black">: -</div>
                                 </div>
                             </div>
 
-                            <!-- Data Orang Tua -->
-                            <div class="bg-gray-50 p-4 rounded-2xl print:bg-white print:p-0 print:rounded-none">
-                                <h4 class="font-bold text-brand-blue mb-3 text-sm uppercase tracking-wide no-print">👨‍👩‍👧 Data Orang Tua</h4>
-                                <h4 class="font-bold border-b border-black mb-3 text-sm uppercase tracking-wide hidden print:block">B. Data Orang Tua</h4>
+                            <div class="mt-6">
+                                <h3 class="font-bold text-lg text-brand-blue border-b-2 border-brand-blue/20 pb-2 mb-4 print:text-black print:border-black uppercase">
+                                    B. Identitas Orang Tua
+                                </h3>
+                                <div class="grid grid-cols-[140px_1fr] gap-y-3 text-sm">
+                                    <div class="text-gray-500 font-semibold print:text-black">Nama Ayah</div>
+                                    <div id="detail-ayah" class="font-semibold text-gray-800 print:text-black">: -</div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div class="border-b border-gray-200 print:border-black pb-2">
-                                        <p class="text-gray-400 text-xs no-print">Nama Ayah</p>
-                                        <p class="font-bold text-gray-700 print:font-normal print:text-black" id="detail-ayah">-</p>
-                                        <p class="text-xs mt-1">Pekerjaan: <span id="detail-pek-ayah" class="text-gray-600">-</span></p>
-                                    </div>
-                                    <div class="border-b border-gray-200 print:border-black pb-2">
-                                        <p class="text-gray-400 text-xs no-print">Nama Ibu</p>
-                                        <p class="font-bold text-gray-700 print:font-normal print:text-black" id="detail-ibu">-</p>
-                                        <p class="text-xs mt-1">Pekerjaan: <span id="detail-pek-ibu" class="text-gray-600">-</span></p>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <p class="text-gray-400 text-xs no-print">No. WhatsApp</p>
-                                        <p class="text-gray-500 text-xs print:block print:mb-1">Kontak</p>
-                                        <p id="detail-wa-text" class="font-semibold text-gray-700 print:text-black">-</p>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <p class="text-gray-400 text-xs no-print">Alamat Domisili</p>
-                                        <p class="text-gray-500 text-xs print:block print:mb-1">Alamat</p>
-                                        <p id="detail-alamat" class="text-gray-700 bg-white p-2 rounded border border-gray-200 mt-1 print:border-none print:bg-white print:p-0">-</p>
-                                    </div>
+                                    <div class="text-gray-500 font-semibold print:text-black">Pekerjaan Ayah</div>
+                                    <div id="detail-pek-ayah" class="font-semibold text-gray-800 print:text-black">: -</div>
+
+                                    <div class="text-gray-500 font-semibold print:text-black">Nama Ibu</div>
+                                    <div id="detail-ibu" class="font-semibold text-gray-800 print:text-black">: -</div>
+
+                                    <div class="text-gray-500 font-semibold print:text-black">Pekerjaan Ibu</div>
+                                    <div id="detail-pek-ibu" class="font-semibold text-gray-800 print:text-black">: -</div>
+
+                                    <div class="text-gray-500 font-semibold print:text-black">No. WhatsApp</div>
+                                    <div id="detail-wa-text" class="font-semibold text-gray-800 print:text-black">: -</div>
+
+                                    <div class="text-gray-500 font-semibold print:text-black">Alamat Domisili</div>
+                                    <div id="detail-alamat" class="font-semibold text-gray-800 print:text-black leading-relaxed">: -</div>
                                 </div>
                             </div>
 
-                            <!-- Data Wali -->
-                            <div id="section-wali" class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 print:bg-white print:p-0 print:rounded-none print:border-none hidden">
-                                <h4 class="font-bold text-yellow-700 mb-3 text-sm uppercase tracking-wide no-print">👤 Data Wali</h4>
-                                <h4 class="font-bold border-b border-black mb-3 text-sm uppercase tracking-wide hidden print:block">C. Data Wali</h4>
-                                <div class="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <p class="text-gray-500 text-xs">Nama Wali</p>
-                                        <p id="detail-nama-wali" class="font-semibold text-gray-700">-</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-500 text-xs">No. HP Wali</p>
-                                        <p id="detail-hp-wali" class="font-semibold text-gray-700">-</p>
-                                    </div>
+                             <div id="section-wali" class="mt-6 hidden">
+                                <h3 class="font-bold text-lg text-brand-blue border-b-2 border-brand-blue/20 pb-2 mb-4 print:text-black print:border-black uppercase">
+                                    C. Data Wali
+                                </h3>
+                                <div class="grid grid-cols-[140px_1fr] gap-y-3 text-sm">
+                                    <div class="text-gray-500 font-semibold print:text-black">Nama Wali</div>
+                                    <div id="detail-nama-wali" class="font-semibold text-gray-800 print:text-black">: -</div>
+                                    <div class="text-gray-500 font-semibold print:text-black">No. HP Wali</div>
+                                    <div id="detail-hp-wali" class="font-semibold text-gray-800 print:text-black">: -</div>
                                 </div>
                             </div>
 
-                        </div>
-                    </div>
-                </div>
+                            <div class="hidden signature-section w-full text-center text-sm">
+                                <div class="w-1/3">
+                                    <p class="mb-16">Mengetahui,<br>Orang Tua/Wali</p>
+                                    <p class="border-t border-black mx-4 pt-1 font-bold">( ............................. )</p>
+                                </div>
+                                <div class="w-1/3">
+                                    <p class="mb-16">Tangerang, <span id="print-date"></span><br>Panitia PPDB</p>
+                                    <p class="border-t border-black mx-4 pt-1 font-bold">KB Harapan Bunda</p>
+                                </div>
+                            </div>
 
-                <!-- Modal Footer (No Print) -->
+                        </div> </div> </div>
+
                 <div class="p-4 bg-gray-50 border-t rounded-b-3xl flex justify-end no-print">
                     <button onclick="closeModal()" class="px-6 py-2 bg-white border border-gray-300 rounded-xl text-gray-600 font-bold hover:bg-gray-100 transition">
                         Tutup
                     </button>
-                    <button onclick="window.print()" class="ml-3 px-6 py-2 bg-gray-800 text-white rounded-xl font-bold hover:bg-black transition flex items-center gap-2">
-                        <i class="fas fa-print"></i> Cetak Data
+                    <button onclick="window.print()" class="ml-3 px-6 py-2 bg-gray-800 text-white rounded-xl font-bold hover:bg-black transition flex items-center gap-2 shadow-lg">
+                        <i class="fas fa-print"></i> Cetak Bukti
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- NAVIGATION -->
     <nav class="sticky top-0 z-50 glass-nav shadow-sm transition-all duration-300 no-print">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('home')">
@@ -376,19 +335,16 @@
                 </div>
             </div>
             
-            <!-- Desktop Menu -->
             <div class="hidden md:flex gap-2">
                 <button onclick="showPage('home')" class="nav-btn px-5 py-2 rounded-full text-sm font-bold text-brand-blue hover:bg-brand-blue/10 transition-all active:scale-95">Beranda</button>
                 <button onclick="showPage('register')" class="nav-btn px-5 py-2 rounded-full text-sm font-bold text-white bg-brand-pink hover:bg-brand-pink/80 shadow-md hover:shadow-lg transition-all active:scale-95">Daftar Sekarang</button>
                 <button onclick="showPage('admin-login')" class="nav-btn px-4 py-2 rounded-full text-sm font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">🔐</button>
             </div>
 
-            <!-- Mobile Menu Icon -->
             <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="md:hidden text-2xl text-brand-blue">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
-        <!-- Mobile Menu Dropdown -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t p-4 flex flex-col gap-3 shadow-lg">
             <button onclick="showPage('home')" class="text-left font-bold text-brand-blue py-2">🏠 Beranda</button>
             <button onclick="showPage('register')" class="text-left font-bold text-brand-pink py-2">📝 Daftar Sekarang</button>
@@ -396,12 +352,9 @@
         </div>
     </nav>
 
-    <!-- MAIN CONTENT CONTAINER -->
     <main class="w-full no-print">
 
-        <!-- ================= HALAMAN BERANDA (HOME) ================= -->
         <div id="page-home" class="page animate-fade-in">
-            <!-- Hero Section -->
             <section class="relative py-12 md:py-20 px-4 overflow-hidden">
                 <div class="absolute top-10 left-10 text-6xl opacity-20 animate-float">☁️</div>
                 <div class="absolute top-20 right-10 text-4xl opacity-20 animate-float-delay">☁️</div>
@@ -431,7 +384,6 @@
                         </div>
                     </div>
 
-                    <!-- Hero Image Card -->
                     <div class="relative bg-white rounded-3xl p-6 card-shadow animate-float-delay">
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-pink-50 rounded-2xl p-6 text-center">
@@ -455,7 +407,6 @@
                 </div>
             </section>
 
-            <!-- Info Grid Section -->
             <section class="py-12 px-4 bg-white/40">
                 <div class="max-w-6xl mx-auto">
                     <h2 class="font-heading text-3xl font-bold text-center text-gray-800 mb-10">✨ Informasi Sekolah</h2>
@@ -490,8 +441,7 @@
                 </div>
             </section>
 
-            <!-- Gallery Section -->
-            <section class="py-16 px-4">
+             <section class="py-16 px-4">
                 <div class="max-w-6xl mx-auto text-center">
                     <h2 class="font-heading text-3xl font-bold text-gray-800 mb-8">📸 Galeri Kegiatan</h2>
                     
@@ -508,15 +458,15 @@
                             <img src="img/foto3.jpg" alt="Kegiatan 3" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://picsum.photos/seed/kb3/400/300'">
                             <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                         </div>
-                        <div class="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3]">
+                         <div class="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3]">
                             <img src="img/foto4.jpg" alt="Kegiatan 4" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://picsum.photos/seed/kb4/400/300'">
                             <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                         </div>
-                        <div class="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3]">
+                         <div class="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3]">
                             <img src="img/foto5.jpg" alt="Kegiatan 5" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://picsum.photos/seed/kb5/400/300'">
                             <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                         </div>
-                        <div class="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3]">
+                         <div class="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3]">
                             <img src="img/foto6.jpg" alt="Kegiatan 6" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://picsum.photos/seed/kb6/400/300'">
                             <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                         </div>
@@ -525,7 +475,6 @@
             </section>
         </div>
 
-        <!-- ================= HALAMAN PENDAFTARAN (REGISTER) ================= -->
         <div id="page-register" class="page hidden animate-fade-in py-10 px-4">
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-10">
@@ -535,7 +484,6 @@
                 </div>
 
                 <form id="formPendaftaran" class="bg-white rounded-3xl p-8 card-shadow space-y-8 border border-pink-100">
-                    <!-- Data Anak -->
                     <div>
                         <h3 class="font-heading text-xl font-bold text-brand-pink mb-4 flex items-center gap-2 border-b border-pink-100 pb-2">
                             <span class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-sm">👶</span> Data Anak
@@ -557,7 +505,6 @@
                                 </div>
                             </div>
                             
-                            <!-- UPLOAD FOTO -->
                             <div class="form-group md:col-span-2">
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Foto Siswa (Upload / Link)</label>
                                 <div class="flex flex-col md:flex-row gap-2">
@@ -573,8 +520,6 @@
                                 </div>
                                 <p id="foto-error" class="text-xs text-red-500 mt-1 hidden"></p>
                             </div>
-                            <!-- END UPLOAD FOTO -->
-
                             <div class="form-group">
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Tanggal Lahir *</label>
                                 <input type="date" name="tgl_lahir" id="input-tgl-lahir" required class="w-full px-4 py-3 rounded-xl input-style">
@@ -595,7 +540,6 @@
 
                     <div class="border-t-2 border-dashed border-gray-200"></div>
 
-                    <!-- Data Orang Tua -->
                     <div>
                         <h3 class="font-heading text-xl font-bold text-brand-blue mb-4 flex items-center gap-2 border-b border-blue-100 pb-2">
                             <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">👨‍👩‍👧</span> Data Orang Tua
@@ -630,7 +574,6 @@
 
                     <div class="border-t-2 border-dashed border-gray-200"></div>
 
-                    <!-- Data Wali -->
                     <div>
                         <h3 class="font-heading text-xl font-bold text-yellow-600 mb-4 flex items-center gap-2 border-b border-yellow-100 pb-2">
                             <span class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-sm">👤</span> Data Wali
@@ -655,7 +598,6 @@
                         </div>
                     </div>
 
-                    <!-- Messages -->
                     <div id="form-success" class="hidden bg-green-50 border-2 border-green-200 rounded-xl p-6 text-center animate-fade-in">
                         <div class="text-5xl mb-3">🎉</div>
                         <h4 class="font-heading text-xl font-bold text-green-700">Alhamdulillah, Data Berhasil!</h4>
@@ -667,7 +609,6 @@
                         <p class="text-red-600 mt-2" id="error-text">Koneksi internet mungkin bermasalah. Coba lagi.</p>
                     </div>
 
-                    <!-- Submit -->
                     <div class="pt-4 flex gap-4">
                         <button type="button" onclick="showPage('home')" class="flex-1 py-4 rounded-xl border-2 border-gray-300 font-bold text-gray-500 hover:bg-gray-50 transition-colors">
                             Batal
@@ -680,7 +621,6 @@
             </div>
         </div>
 
-        <!-- ================= HALAMAN ADMIN LOGIN ================= -->
         <div id="page-admin-login" class="page hidden animate-fade-in py-20 px-4">
             <div class="max-w-md mx-auto">
                 <div class="text-center mb-8">
@@ -707,7 +647,6 @@
             </div>
         </div>
 
-        <!-- ================= HALAMAN DASHBOARD ADMIN ================= -->
         <div id="page-admin-dashboard" class="page hidden animate-fade-in py-8 px-4">
             <section>
                 <div class="max-w-6xl mx-auto">
@@ -723,7 +662,6 @@
                         </div>
                     </div>
 
-                    <!-- ADMIN TABS -->
                     <div class="flex gap-4 mb-8 border-b border-gray-200">
                         <button onclick="switchTab('data')" id="btn-tab-data" class="px-6 py-3 font-bold text-brand-blue border-b-4 border-brand-blue transition-all bg-blue-50 rounded-t-lg">
                             📋 Data Pendaftar
@@ -733,9 +671,7 @@
                         </button>
                     </div>
 
-                    <!-- TAB CONTENT: DATA PENDAFTAR -->
                     <div id="tab-data" class="space-y-8">
-                        <!-- Statistik Cards -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="bg-white rounded-2xl p-6 card-shadow text-center">
                                 <div class="text-3xl mb-2">📝</div>
@@ -759,7 +695,6 @@
                             </div>
                         </div>
 
-                        <!-- Tabel Data -->
                         <div class="bg-white rounded-3xl card-shadow overflow-hidden">
                             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                 <h2 class="font-heading text-xl font-bold text-gray-800">📋 Data Pendaftar</h2>
@@ -782,14 +717,12 @@
                                         </tr>
                                     </thead>
                                     <tbody id="table-body" class="divide-y divide-gray-100 text-sm">
-                                        <!-- Data Generated by JS -->
-                                    </tbody>
+                                        </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TAB CONTENT: PENGATURAN WEB -->
                     <div id="tab-settings" class="hidden">
                         <div class="bg-white rounded-3xl card-shadow p-8">
                             <h2 class="font-heading text-2xl font-bold text-gray-800 mb-6 border-b pb-4">⚙️ Pengaturan Website</h2>
@@ -834,7 +767,6 @@
 
     </main>
 
-    <!-- FOOTER -->
     <footer class="bg-white/80 border-t border-white py-8 px-4 mt-12 no-print">
         <div class="max-w-6xl mx-auto text-center">
             <div class="flex justify-center gap-4 text-2xl mb-4 text-gray-400">
@@ -1102,17 +1034,15 @@
 
             // Populate UI
             const elDetailNama = document.getElementById('detail-nama');
-            const elDetailNamaPrint = document.getElementById('detail-nama-print');
             const elDetailId = document.getElementById('detail-id');
             const elDetailIdPrint = document.getElementById('detail-id-print');
 
-            if(elDetailNama) elDetailNama.innerText = getVal('Nama Anak');
-            if(elDetailNamaPrint) elDetailNamaPrint.innerText = getVal('Nama Anak');
+            if(elDetailNama) elDetailNama.innerText = ": " + getVal('Nama Anak');
             
             const idValue = (siswa['Timestamp'] ? new Date(siswa['Timestamp']).getTime() : index);
-            if(elDetailId) elDetailId.innerText = 'ID: ' + idValue;
-            if(elDetailIdPrint) elDetailIdPrint.innerText = 'ID: ' + idValue;
+            if(elDetailId) elDetailId.innerText = ": " + idValue;
             
+            // FOTO LOGIC
             const fotoUrl = getVal('Link Foto');
             const imgEl = document.getElementById('detail-foto');
             const placeholder = document.getElementById('detail-foto-placeholder');
@@ -1127,49 +1057,54 @@
             }
 
             const elDetailJk = document.getElementById('detail-jk');
-            if(elDetailJk) elDetailJk.innerText = getVal('JK') === 'Laki-laki' ? 'Laki-laki' : (getVal('JK') === 'Perempuan' ? 'Perempuan' : '-');
+            if(elDetailJk) elDetailJk.innerText = ": " + (getVal('JK') === 'Laki-laki' ? 'Laki-laki' : (getVal('JK') === 'Perempuan' ? 'Perempuan' : '-'));
             
-            // Gunakan fungsi hitungUmur yang baru
+            // Umur Logic
             let umurTxt = hitungUmur(getVal('Tgl Lahir'));
-            if (umurTxt !== '-') umurTxt += " Tahun";
-
             const elDetailUmur = document.getElementById('detail-umur');
-            if(elDetailUmur) elDetailUmur.innerText = umurTxt;
+            if(elDetailUmur) elDetailUmur.innerText = (umurTxt !== '-') ? umurTxt + " Th" : "- Th";
+
+            const elDetailUmurPrint = document.getElementById('detail-umur-print');
+            if(elDetailUmurPrint) elDetailUmurPrint.innerText = (umurTxt !== '-') ? `(Usia: ${umurTxt} Tahun)` : "";
 
             const tglLahirFormatted = formatDateIndo(getVal('Tgl Lahir'));
             const elDetailTglLahir = document.getElementById('detail-tgl-lahir');
             if(elDetailTglLahir) elDetailTglLahir.innerText = tglLahirFormatted;
 
+            // Date for print signature
+            const printDate = document.getElementById('print-date');
+            if(printDate) printDate.innerText = formatDateIndo(new Date());
+
             const elDetailAgama = document.getElementById('detail-agama');
-            if(elDetailAgama) elDetailAgama.innerText = getVal('Agama');
+            if(elDetailAgama) elDetailAgama.innerText = ": " + getVal('Agama');
 
             const elDetailAyah = document.getElementById('detail-ayah');
-            if(elDetailAyah) elDetailAyah.innerText = getVal('Nama Ayah');
+            if(elDetailAyah) elDetailAyah.innerText = ": " + getVal('Nama Ayah');
             
             const elDetailIbu = document.getElementById('detail-ibu');
-            if(elDetailIbu) elDetailIbu.innerText = getVal('Nama Ibu');
+            if(elDetailIbu) elDetailIbu.innerText = ": " + getVal('Nama Ibu');
             
             const elDetailPekAyah = document.getElementById('detail-pek-ayah');
-            if(elDetailPekAyah) elDetailPekAyah.innerText = getVal('Pek. Ayah');
+            if(elDetailPekAyah) elDetailPekAyah.innerText = ": " + getVal('Pek. Ayah');
             
             const elDetailPekIbu = document.getElementById('detail-pek-ibu');
-            if(elDetailPekIbu) elDetailPekIbu.innerText = getVal('Pek. Ibu');
+            if(elDetailPekIbu) elDetailPekIbu.innerText = ": " + getVal('Pek. Ibu');
             
             const elDetailWaText = document.getElementById('detail-wa-text');
-            if(elDetailWaText) elDetailWaText.innerText = getVal('No HP');
+            if(elDetailWaText) elDetailWaText.innerText = ": " + getVal('No HP');
             
             const elDetailAlamat = document.getElementById('detail-alamat');
-            if(elDetailAlamat) elDetailAlamat.innerText = getVal('Alamat');
+            if(elDetailAlamat) elDetailAlamat.innerText = ": " + getVal('Alamat');
 
             const waliNama = getVal('Nama Wali');
             const sectionWali = document.getElementById('section-wali');
             if (waliNama && waliNama !== '-') {
                 sectionWali.classList.remove('hidden');
                 const elDetailNamaWali = document.getElementById('detail-nama-wali');
-                if(elDetailNamaWali) elDetailNamaWali.innerText = waliNama;
+                if(elDetailNamaWali) elDetailNamaWali.innerText = ": " + waliNama;
                 
                 const elDetailHpWali = document.getElementById('detail-hp-wali');
-                if(elDetailHpWali) elDetailHpWali.innerText = getVal('No HP Wali');
+                if(elDetailHpWali) elDetailHpWali.innerText = ": " + getVal('No HP Wali');
             } else {
                 sectionWali.classList.add('hidden');
             }
