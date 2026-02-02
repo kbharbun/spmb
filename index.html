@@ -235,8 +235,11 @@
                                 </div>
                             </div>
                             
+                            <!-- AREA PREVIEW (Tambahan ID detail-id yang hilang) -->
                             <div class="text-center w-full no-print">
                                 <h3 id="detail-nama" class="font-heading text-xl font-bold text-gray-800 leading-tight">Nama Anak</h3>
+                                <!-- ID HILANG INI DITAMBAHKAN -->
+                                <p id="detail-id" class="text-xs text-gray-500 mt-1">ID: -</p>
                             </div>
                         </div>
 
@@ -866,17 +869,23 @@
         }
 
         // --- 4. ADMIN LOGIN LOGIC ---
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const u = document.getElementById('admin-user').value;
-            const p = document.getElementById('admin-pass').value;
-            const err = document.getElementById('login-error');
+        // Memastikan elemen form ada sebelum menambahkan event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('login-form');
+            if(loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const u = document.getElementById('admin-user').value;
+                    const p = document.getElementById('admin-pass').value;
+                    const err = document.getElementById('login-error');
 
-            if(u === 'admin' && p === 'harapanbunda2024') {
-                showPage('admin-dashboard');
-                err.classList.add('hidden');
-            } else {
-                err.classList.remove('hidden');
+                    if(u === 'admin' && p === 'harapanbunda2024') {
+                        showPage('admin-dashboard');
+                        err.classList.add('hidden');
+                    } else {
+                        err.classList.remove('hidden');
+                    }
+                });
             }
         });
 
@@ -897,41 +906,52 @@
                 if (data.result === 'success' && data.konten) {
                     websiteConfig = data.konten;
                     // Fill Settings Form
-                    document.getElementById('set-judul').value = websiteConfig.judulUtama || '';
-                    document.getElementById('set-alamat').value = websiteConfig.alamat || '';
-                    document.getElementById('set-kontak').value = websiteConfig.noKontak || '';
-                    document.getElementById('set-kontak-person').value = websiteConfig.kontakPerson || '';
-                    document.getElementById('set-ajaran').value = websiteConfig.periode || '';
+                    const setJudul = document.getElementById('set-judul');
+                    const setAlamat = document.getElementById('set-alamat');
+                    const setKontak = document.getElementById('set-kontak');
+                    const setKontakPerson = document.getElementById('set-kontak-person');
+                    const setAjaran = document.getElementById('set-ajaran');
+
+                    if(setJudul) setJudul.value = websiteConfig.judulUtama || '';
+                    if(setAlamat) setAlamat.value = websiteConfig.alamat || '';
+                    if(setKontak) setKontak.value = websiteConfig.noKontak || '';
+                    if(setKontakPerson) setKontakPerson.value = websiteConfig.kontakPerson || '';
+                    if(setAjaran) setAjaran.value = websiteConfig.periode || '';
                 }
             } catch (e) {
                 console.log("Gagal load config:", e);
             }
         }
 
-        document.getElementById('settings-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if(!confirm("Update tampilan website?")) return;
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsForm = document.getElementById('settings-form');
+            if(settingsForm) {
+                settingsForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    if(!confirm("Update tampilan website?")) return;
 
-            const loading = document.getElementById('loadingOverlay');
-            loading.style.display = 'flex';
+                    const loading = document.getElementById('loadingOverlay');
+                    loading.style.display = 'flex';
 
-            const formData = new FormData();
-            formData.append('action', 'update_config');
-            formData.append('judulUtama', document.getElementById('set-judul').value);
-            formData.append('alamat', document.getElementById('set-alamat').value);
-            formData.append('noKontak', document.getElementById('set-kontak').value);
-            formData.append('kontakPerson', document.getElementById('set-kontak-person').value);
-            formData.append('periode', document.getElementById('set-ajaran').value);
+                    const formData = new FormData();
+                    formData.append('action', 'update_config');
+                    formData.append('judulUtama', document.getElementById('set-judul').value);
+                    formData.append('alamat', document.getElementById('set-alamat').value);
+                    formData.append('noKontak', document.getElementById('set-kontak').value);
+                    formData.append('kontakPerson', document.getElementById('set-kontak-person').value);
+                    formData.append('periode', document.getElementById('set-ajaran').value);
 
-            try {
-                const res = await fetch(scriptURL, { method: 'POST', body: formData });
-                loading.style.display = 'none';
-                alert('✅ Pengaturan berhasil disimpan! Halaman akan dimuat ulang.');
-                location.reload(); // Reload untuk menerapkan perubahan
-            } catch (error) {
-                loading.style.display = 'none';
-                alert('❌ Gagal menyimpan pengaturan.');
+                    try {
+                        const res = await fetch(scriptURL, { method: 'POST', body: formData });
+                        loading.style.display = 'none';
+                        alert('✅ Pengaturan berhasil disimpan! Halaman akan dimuat ulang.');
+                        location.reload(); // Reload untuk menerapkan perubahan
+                    } catch (error) {
+                        loading.style.display = 'none';
+                        alert('❌ Gagal menyimpan pengaturan.');
+                    }
+                });
             }
         });
 
@@ -981,10 +1001,17 @@
             const getVal = (key) => siswa[key] || '-';
 
             // Populate UI
-            document.getElementById('detail-nama').innerText = getVal('Nama Anak');
-            document.getElementById('detail-nama-print').innerText = getVal('Nama Anak');
-            document.getElementById('detail-id').innerText = 'ID: ' + (siswa['Timestamp'] ? new Date(siswa['Timestamp']).getTime() : index);
-            document.getElementById('detail-id-print').innerText = 'ID: ' + (siswa['Timestamp'] ? new Date(siswa['Timestamp']).getTime() : index);
+            const elDetailNama = document.getElementById('detail-nama');
+            const elDetailNamaPrint = document.getElementById('detail-nama-print');
+            const elDetailId = document.getElementById('detail-id');
+            const elDetailIdPrint = document.getElementById('detail-id-print');
+
+            if(elDetailNama) elDetailNama.innerText = getVal('Nama Anak');
+            if(elDetailNamaPrint) elDetailNamaPrint.innerText = getVal('Nama Anak');
+            
+            const idValue = (siswa['Timestamp'] ? new Date(siswa['Timestamp']).getTime() : index);
+            if(elDetailId) elDetailId.innerText = 'ID: ' + idValue; // FIX: Elemen yang hilang
+            if(elDetailIdPrint) elDetailIdPrint.innerText = 'ID: ' + idValue;
             
             const fotoUrl = getVal('Link Foto');
             const imgEl = document.getElementById('detail-foto');
@@ -999,7 +1026,8 @@
                 placeholder.classList.remove('hidden');
             }
 
-            document.getElementById('detail-jk').innerText = getVal('JK') === 'Laki-laki' ? 'Laki-laki' : (getVal('JK') === 'Perempuan' ? 'Perempuan' : '-');
+            const elDetailJk = document.getElementById('detail-jk');
+            if(elDetailJk) elDetailJk.innerText = getVal('JK') === 'Laki-laki' ? 'Laki-laki' : (getVal('JK') === 'Perempuan' ? 'Perempuan' : '-');
             
             let umurTxt = "-";
             if(getVal('Tgl Lahir') && getVal('Tgl Lahir') !== '-') {
@@ -1008,26 +1036,43 @@
                 const age_dt = new Date(diff_ms); 
                 umurTxt = Math.abs(age_dt.getUTCFullYear() - 1970) + " Tahun";
             }
-            document.getElementById('detail-umur').innerText = umurTxt;
+            const elDetailUmur = document.getElementById('detail-umur');
+            if(elDetailUmur) elDetailUmur.innerText = umurTxt;
 
             const tglLahirFormatted = formatDateIndo(getVal('Tgl Lahir'));
-            document.getElementById('detail-tgl-lahir').innerText = tglLahirFormatted;
-            document.getElementById('detail-agama').innerText = getVal('Agama');
+            const elDetailTglLahir = document.getElementById('detail-tgl-lahir');
+            if(elDetailTglLahir) elDetailTglLahir.innerText = tglLahirFormatted;
 
-            document.getElementById('detail-ayah').innerText = getVal('Nama Ayah');
-            document.getElementById('detail-ibu').innerText = getVal('Nama Ibu');
-            document.getElementById('detail-pek-ayah').innerText = getVal('Pek. Ayah');
-            document.getElementById('detail-pek-ibu').innerText = getVal('Pek. Ibu');
+            const elDetailAgama = document.getElementById('detail-agama');
+            if(elDetailAgama) elDetailAgama.innerText = getVal('Agama');
+
+            const elDetailAyah = document.getElementById('detail-ayah');
+            if(elDetailAyah) elDetailAyah.innerText = getVal('Nama Ayah');
             
-            document.getElementById('detail-wa-text').innerText = getVal('No HP');
-            document.getElementById('detail-alamat').innerText = getVal('Alamat');
+            const elDetailIbu = document.getElementById('detail-ibu');
+            if(elDetailIbu) elDetailIbu.innerText = getVal('Nama Ibu');
+            
+            const elDetailPekAyah = document.getElementById('detail-pek-ayah');
+            if(elDetailPekAyah) elDetailPekAyah.innerText = getVal('Pek. Ayah');
+            
+            const elDetailPekIbu = document.getElementById('detail-pek-ibu');
+            if(elDetailPekIbu) elDetailPekIbu.innerText = getVal('Pek. Ibu');
+            
+            const elDetailWaText = document.getElementById('detail-wa-text');
+            if(elDetailWaText) elDetailWaText.innerText = getVal('No HP');
+            
+            const elDetailAlamat = document.getElementById('detail-alamat');
+            if(elDetailAlamat) elDetailAlamat.innerText = getVal('Alamat');
 
             const waliNama = getVal('Nama Wali');
             const sectionWali = document.getElementById('section-wali');
             if (waliNama && waliNama !== '-') {
                 sectionWali.classList.remove('hidden');
-                document.getElementById('detail-nama-wali').innerText = waliNama;
-                document.getElementById('detail-hp-wali').innerText = getVal('No HP Wali');
+                const elDetailNamaWali = document.getElementById('detail-nama-wali');
+                if(elDetailNamaWali) elDetailNamaWali.innerText = waliNama;
+                
+                const elDetailHpWali = document.getElementById('detail-hp-wali');
+                if(elDetailHpWali) elDetailHpWali.innerText = getVal('No HP Wali');
             } else {
                 sectionWali.classList.add('hidden');
             }
@@ -1046,7 +1091,7 @@
                 today: document.getElementById('stat-today')
             };
 
-            tbody.innerHTML = ''; 
+            if(tbody) tbody.innerHTML = ''; 
 
             try {
                 const response = await fetch(scriptURL + '?action=get_siswa');
@@ -1115,7 +1160,7 @@
                                     <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Baru</span>
                                 </td>
                                 <td class="px-6 py-4 text-center relative z-10">
-                                    <!-- FIX: Tombol Mata yang bisa diklik (Added type button, z-index, relative) -->
+                                    <!-- FIX: Tombol Mata yang bisa diklik -->
                                     <button type="button" onclick="showDetail(${index})" class="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors shadow-sm relative z-10" title="Lihat Detail">
                                         <i class="fas fa-eye text-lg"></i>
                                     </button>
@@ -1125,10 +1170,10 @@
                         });
                     }
 
-                    stats.total.innerText = data.length;
-                    stats.lk.innerText = countLk;
-                    stats.pr.innerText = countPr;
-                    stats.today.innerText = countToday;
+                    if(stats.total) stats.total.innerText = data.length;
+                    if(stats.lk) stats.lk.innerText = countLk;
+                    if(stats.pr) stats.pr.innerText = countPr;
+                    if(stats.today) stats.today.innerText = countToday;
 
                 } else {
                     throw new Error('Format data tidak sesuai');
@@ -1136,7 +1181,7 @@
 
             } catch (error) {
                 console.error('Error fetching data:', error);
-                tbody.innerHTML = `
+                if(tbody) tbody.innerHTML = `
                     <tr>
                         <td colspan="8" class="px-6 py-12 text-center text-red-400">
                             <div class="flex flex-col items-center">
@@ -1150,36 +1195,40 @@
         }
 
         // --- 8. FORM SUBMISSION ---
-        const form = document.getElementById('formPendaftaran');
-        const loading = document.getElementById('loadingOverlay');
-        const successMsg = document.getElementById('form-success');
-        const errorMsg = document.getElementById('form-error');
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formPendaftaran');
+            if(form) {
+                form.addEventListener('submit', e => {
+                    e.preventDefault();
+                    if(!confirm("Pastikan data sudah benar. Lanjutkan kirim?")) return;
 
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            if(!confirm("Pastikan data sudah benar. Lanjutkan kirim?")) return;
+                    const loading = document.getElementById('loadingOverlay');
+                    const successMsg = document.getElementById('form-success');
+                    const errorMsg = document.getElementById('form-error');
 
-            loading.style.display = 'flex';
-            successMsg.classList.add('hidden');
-            errorMsg.classList.add('hidden');
-            
-            fetch(scriptURL, { 
-                method: 'POST', 
-                body: new FormData(form), 
-                mode: 'no-cors' 
-            })
-            .then(() => {
-                loading.style.display = 'none';
-                successMsg.classList.remove('hidden');
-                successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                form.reset();
-            })
-            .catch(error => {
-                loading.style.display = 'none';
-                console.error('Error!', error.message);
-                errorMsg.classList.remove('hidden');
-                errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
+                    loading.style.display = 'flex';
+                    successMsg.classList.add('hidden');
+                    errorMsg.classList.add('hidden');
+                    
+                    fetch(scriptURL, { 
+                        method: 'POST', 
+                        body: new FormData(form), 
+                        mode: 'no-cors' 
+                    })
+                    .then(() => {
+                        loading.style.display = 'none';
+                        successMsg.classList.remove('hidden');
+                        successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        form.reset();
+                    })
+                    .catch(error => {
+                        loading.style.display = 'none';
+                        console.error('Error!', error.message);
+                        errorMsg.classList.remove('hidden');
+                        errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                });
+            }
         });
 
         // --- 9. INITIAL FETCH ---
@@ -1192,24 +1241,33 @@
                 if (data.result === 'success' && data.konten) {
                     const c = data.konten;
                     // Update Home UI
-                    if(c.judulUtama) {
-                        const h1 = document.getElementById('hero-title');
+                    const h1 = document.getElementById('hero-title');
+                    if(c.judulUtama && h1) {
                         h1.innerHTML = `Selamat Datang di <span class="text-brand-pink">${c.judulUtama}</span>`;
-                        document.getElementById('nav-title').innerText = c.judulUtama;
+                        const navTitle = document.getElementById('nav-title');
+                        if(navTitle) navTitle.innerText = c.judulUtama;
                         document.title = c.judulUtama + " - SPMB Online";
                     }
                     if(c.alamat) {
-                        document.getElementById('alamat-sekolah').innerText = c.alamat;
-                        document.getElementById('footer-alamat').innerText = c.alamat;
+                        const alamatSekolah = document.getElementById('alamat-sekolah');
+                        const footerAlamat = document.getElementById('footer-alamat');
+                        if(alamatSekolah) alamatSekolah.innerText = c.alamat;
+                        if(footerAlamat) footerAlamat.innerText = c.alamat;
                     }
                     if(c.noKontak) {
-                        document.getElementById('no-kontak').innerText = c.noKontak;
-                        // Update link WA jika ganti nomor
+                        const noKontakEl = document.getElementById('no-kontak');
+                        if(noKontakEl) noKontakEl.innerText = c.noKontak;
                         const waLink = document.getElementById('link-wa');
-                        waLink.href = "https://wa.me/" + c.noKontak.replace(/\D/g,'');
+                        if(waLink) waLink.href = "https://wa.me/" + c.noKontak.replace(/\D/g,'');
                     }
-                    if(c.kontakPerson) document.getElementById('kontak-person').innerText = c.kontakPerson;
-                    if(c.periode) document.getElementById('periode-daftar').innerText = c.periode;
+                    if(c.kontakPerson) {
+                        const kontakPersonEl = document.getElementById('kontak-person');
+                        if(kontakPersonEl) kontakPersonEl.innerText = c.kontakPerson;
+                    }
+                    if(c.periode) {
+                        const periodeEl = document.getElementById('periode-daftar');
+                        if(periodeEl) periodeEl.innerText = c.periode;
+                    }
                 }
             } catch (e) {
                 console.log("Config fetch skipped or failed:", e);
