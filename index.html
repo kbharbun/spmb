@@ -177,11 +177,25 @@
 
             #modal-content > div:nth-child(2) {
                 display: flex !important;
-                /* PERUBAHAN 1: Foto pindah ke kanan (row-reverse) */
-                flex-direction: row-reverse !important; 
+                /* PERUBAHAN UTAMA: Urutan Normal (Data Kiri, Foto Kanan) */
+                flex-direction: row !important; 
+                justify-content: flex-start !important;
+                align-items: flex-start !important;
                 gap: 40px !important;
             }
             
+            /* Kolom Foto di Print (Posisi Kanan) */
+            .photo-col-print {
+                order: 2; /* Pastikan di kanan */
+                flex-shrink: 0;
+            }
+
+            /* Kolom Data di Print (Posisi Kiri) */
+            .data-col-print {
+                order: 1;
+                flex-grow: 1;
+            }
+
             .photo-frame-3x4 {
                 border: 2px solid #000 !important; 
                 width: 140px;
@@ -221,9 +235,9 @@
                 
                 <!-- Modal Header -->
                 <div class="bg-brand-blue text-white p-6 rounded-t-3xl flex justify-between items-center sticky top-0 z-10 no-print">
-                    <!-- PERUBAHAN 2: Teks Detail Pendaftar & Data lengkap calon siswa dihapus -->
-                    <div>
-                        <!-- Teks Header Dihapus -->
+                    <div class="opacity-0">
+                        <!-- Hidden placeholder to balance flex -->
+                        Kosong
                     </div>
                     <button onclick="closeModal()" class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition w-10 h-10 flex items-center justify-center">
                         <i class="fas fa-times text-xl"></i>
@@ -232,31 +246,18 @@
 
                 <!-- Modal Body (Print Area) -->
                 <div class="p-8">
-                    <div class="flex flex-col md:flex-row gap-8">
+                    
+                    <!-- 
+                       PERUBAHAN STRUKTUR HTML: 
+                       1. Data Lengkap (Kiri di Print)
+                       2. Foto (Kanan di Print)
+                    -->
+                    <div class="flex flex-col md:flex-row gap-8 md:flex-row-reverse">
                         
-                        <!-- Kolom Kiri: Foto -->
-                        <div class="flex flex-col items-center gap-4 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-gray-100 pb-8 md:pb-0 md:pr-8">
-                            <div class="font-bold text-gray-800 mb-2 no-print">Preview Foto</div>
-                            
-                            <!-- Frame Foto 3x4 -->
-                            <div class="photo-frame-3x4 bg-gray-100 group">
-                                <img id="detail-foto" src="" alt="Foto Siswa" class="w-full h-full object-cover hidden">
-                                <div id="detail-foto-placeholder" class="text-gray-400 flex flex-col items-center">
-                                    <i class="fas fa-user text-4xl mb-2"></i>
-                                    <span class="text-xs text-center px-2 leading-tight">Tempel<br>Foto<br>Disini</span>
-                                </div>
-                            </div>
-                            
-                            <!-- AREA PREVIEW -->
-                            <div class="text-center w-full no-print">
-                                <h3 id="detail-nama" class="font-heading text-xl font-bold text-gray-800 leading-tight">Nama Anak</h3>
-                                <!-- ID HILANG INI DITAMBAHKAN -->
-                                <p id="detail-id" class="text-xs text-gray-500 mt-1">ID: -</p>
-                            </div>
-                        </div>
-
-                        <!-- Kolom Kanan: Data Lengkap -->
-                        <div class="w-full md:w-3/4 space-y-6">
+                        <!-- 1. KOLOM DATA LENGKAP (HTML Pertama) -->
+                        <!-- Screen: Kanan (karena flex-row-reverse parent) -->
+                        <!-- Print: Kiri (karena flex-row parent + order-1) -->
+                        <div class="w-full md:w-3/4 space-y-6 data-col-print">
                             
                             <!-- Header Print -->
                             <div class="hidden print:block text-center mb-6">
@@ -344,6 +345,30 @@
                             </div>
 
                         </div>
+
+                        <!-- 2. KOLOM FOTO (HTML Kedua) -->
+                        <!-- Screen: Kiri (karena flex-row-reverse parent) -->
+                        <!-- Print: Kanan (karena flex-row parent + order-2) -->
+                        <div class="flex flex-col items-center gap-4 w-full md:w-1/4 border-b md:border-b-0 md:border-l border-gray-100 pb-8 md:pb-0 md:pl-8 photo-col-print md:pr-0 md:border-none">
+                            <div class="font-bold text-gray-800 mb-2 no-print">Preview Foto</div>
+                            
+                            <!-- Frame Foto 3x4 -->
+                            <div class="photo-frame-3x4 bg-gray-100 group">
+                                <img id="detail-foto" src="" alt="Foto Siswa" class="w-full h-full object-cover hidden">
+                                <div id="detail-foto-placeholder" class="text-gray-400 flex flex-col items-center">
+                                    <i class="fas fa-user text-4xl mb-2"></i>
+                                    <span class="text-xs text-center px-2 leading-tight">Tempel<br>Foto<br>Disini</span>
+                                </div>
+                            </div>
+                            
+                            <!-- AREA PREVIEW -->
+                            <div class="text-center w-full no-print">
+                                <h3 id="detail-nama" class="font-heading text-xl font-bold text-gray-800 leading-tight">Nama Anak</h3>
+                                <!-- ID HILANG INI DITAMBAHKAN -->
+                                <p id="detail-id" class="text-xs text-gray-500 mt-1">ID: -</p>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
