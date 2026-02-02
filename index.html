@@ -1148,7 +1148,7 @@
             openModal();
         }
 
-        // --- 8. LOAD DATA ADMIN ---
+               // --- 8. LOAD DATA ADMIN (DIUPDATE) ---
         async function loadDataSiswa() {
             const tbody = document.getElementById('table-body');
             
@@ -1176,13 +1176,14 @@
                          tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">Data masih kosong.</td></tr>`;
                     } else {
                         data.forEach((row, index) => {
+                            // PASTIKAN KUNCI SESUAI DENGAN CODE.gs
                             const namaAnak = row['Nama Anak'] || '-';
                             const agama = row['Agama'] || '';
                             const tglLahir = row['Tgl Lahir'];
-                            const jk = row['JK'];
+                            const jk = row['JK']; // Mengambil kunci 'JK'
                             const namaAyah = row['Nama Ayah'] || '-';
                             const namaIbu = row['Nama Ibu'] || '-';
-                            const noHp = row['No HP'] || '-';
+                            const noHp = row['No HP'] || '-'; // Mengambil kunci 'No HP'
                             
                             let umur = "-";
                             if (tglLahir) {
@@ -1192,6 +1193,7 @@
                                 umur = Math.abs(age_dt.getUTCFullYear() - 1970);
                             }
 
+                            // Hitung statistik
                             if(jk === 'Laki-laki') countLk++;
                             if(jk === 'Perempuan') countPr++;
                             if(row['Timestamp']) {
@@ -1237,6 +1239,7 @@
                         });
                     }
 
+                    // Update Statistik
                     if(stats.total) stats.total.innerText = data.length;
                     if(stats.lk) stats.lk.innerText = countLk;
                     if(stats.pr) stats.pr.innerText = countPr;
@@ -1253,12 +1256,99 @@
                         <td colspan="8" class="px-6 py-12 text-center text-red-400">
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
-                                <p>Gagal memuat data.</p>
+                                <p>Gagal memuat data. Cek Console (F12).</p>
                             </div>
                         </td>
                     </tr>
                 `;
             }
+        }
+
+        // --- 7. MODAL DETAIL LOGIC (DIUPDATE) ---
+        function showDetail(index) {
+            const siswa = databaseSiswa[index];
+            if (!siswa) return;
+
+            const getVal = (key) => siswa[key] || '-';
+
+            // Populate UI
+            const elDetailNama = document.getElementById('detail-nama');
+            const elDetailNamaPrint = document.getElementById('detail-nama-print');
+            const elDetailId = document.getElementById('detail-id');
+            const elDetailIdPrint = document.getElementById('detail-id-print');
+
+            if(elDetailNama) elDetailNama.innerText = getVal('Nama Anak'); // Kunci: Nama Anak
+            if(elDetailNamaPrint) elDetailNamaPrint.innerText = getVal('Nama Anak');
+            
+            const idValue = (siswa['Timestamp'] ? new Date(siswa['Timestamp']).getTime() : index);
+            if(elDetailId) elDetailId.innerText = 'ID: ' + idValue;
+            if(elDetailIdPrint) elDetailIdPrint.innerText = 'ID: ' + idValue;
+            
+            const fotoUrl = getVal('Link Foto');
+            const imgEl = document.getElementById('detail-foto');
+            const placeholder = document.getElementById('detail-foto-placeholder');
+
+            if (fotoUrl && fotoUrl !== '-' && fotoUrl.startsWith('http')) {
+                imgEl.src = fotoUrl;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+
+            const elDetailJk = document.getElementById('detail-jk');
+            if(elDetailJk) elDetailJk.innerText = getVal('JK') === 'Laki-laki' ? 'Laki-laki' : (getVal('JK') === 'Perempuan' ? 'Perempuan' : '-'); // Kunci: JK
+            
+            let umurTxt = "-";
+            if(getVal('Tgl Lahir') && getVal('Tgl Lahir') !== '-') {
+                const dob = new Date(getVal('Tgl Lahir')); // Kunci: Tgl Lahir
+                const diff_ms = Date.now() - dob.getTime();
+                const age_dt = new Date(diff_ms); 
+                umurTxt = Math.abs(age_dt.getUTCFullYear() - 1970) + " Tahun";
+            }
+            const elDetailUmur = document.getElementById('detail-umur');
+            if(elDetailUmur) elDetailUmur.innerText = umurTxt;
+
+            const tglLahirFormatted = formatDateIndo(getVal('Tgl Lahir'));
+            const elDetailTglLahir = document.getElementById('detail-tgl-lahir');
+            if(elDetailTglLahir) elDetailTglLahir.innerText = tglLahirFormatted;
+
+            const elDetailAgama = document.getElementById('detail-agama');
+            if(elDetailAgama) elDetailAgama.innerText = getVal('Agama'); // Kunci: Agama
+
+            const elDetailAyah = document.getElementById('detail-ayah');
+            if(elDetailAyah) elDetailAyah.innerText = getVal('Nama Ayah');
+            
+            const elDetailIbu = document.getElementById('detail-ibu');
+            if(elDetailIbu) elDetailIbu.innerText = getVal('Nama Ibu');
+            
+            const elDetailPekAyah = document.getElementById('detail-pek-ayah');
+            if(elDetailPekAyah) elDetailPekAyah.innerText = getVal('Pek. Ayah'); // Kunci: Pek. Ayah
+            
+            const elDetailPekIbu = document.getElementById('detail-pek-ibu');
+            if(elDetailPekIbu) elDetailPekIbu.innerText = getVal('Pek. Ibu'); // Kunci: Pek. Ibu
+            
+            const elDetailWaText = document.getElementById('detail-wa-text');
+            if(elDetailWaText) elDetailWaText.innerText = getVal('No HP'); // Kunci: No HP
+            
+            const elDetailAlamat = document.getElementById('detail-alamat');
+            if(elDetailAlamat) elDetailAlamat.innerText = getVal('Alamat'); // Kunci: Alamat
+
+            const waliNama = getVal('Nama Wali'); // Kunci: Nama Wali
+            const sectionWali = document.getElementById('section-wali');
+            if (waliNama && waliNama !== '-') {
+                sectionWali.classList.remove('hidden');
+                const elDetailNamaWali = document.getElementById('detail-nama-wali');
+                if(elDetailNamaWali) elDetailNamaWali.innerText = waliNama;
+                
+                const elDetailHpWali = document.getElementById('detail-hp-wali');
+                if(elDetailHpWali) elDetailHpWali.innerText = getVal('No HP Wali'); // Kunci: No HP Wali
+            } else {
+                sectionWali.classList.add('hidden');
+            }
+
+            openModal();
         }
 
         // --- 9. FORM SUBMISSION ---
