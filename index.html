@@ -472,7 +472,7 @@
                 </div>
             </section>
 
-            <!-- Gallery Section (RESTORED) -->
+            <!-- Gallery Section -->
             <section class="py-16 px-4">
                 <div class="max-w-6xl mx-auto text-center">
                     <h2 class="font-heading text-3xl font-bold text-gray-800 mb-8">📸 Galeri Kegiatan</h2>
@@ -797,7 +797,7 @@
 
     </main>
 
-    <!-- FOOTER (RESTORED) -->
+    <!-- FOOTER -->
     <footer class="bg-white/80 border-t border-white py-8 px-4 mt-12 no-print">
         <div class="max-w-6xl mx-auto text-center">
             <div class="flex justify-center gap-4 text-2xl mb-4 text-gray-400">
@@ -814,6 +814,7 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         // --- 1. CONFIGURATION ---
+        // GANTI URL INI DENGAN URL BARU DARI LANGKAH 1
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxObNo1BFGjWUnRnni96YUhjOGipY1lViTfVPfyRZDbhGbuPY6nDNrX2Nu89HxqmBzRhA/exec';
         
         let databaseSiswa = [];
@@ -1113,9 +1114,9 @@
                                 <td class="px-6 py-4">
                                     <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Baru</span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <!-- Tombol Mata yang bisa diklik -->
-                                    <button type="button" onclick="showDetail(${index})" class="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors shadow-sm z-10 relative" title="Lihat Detail">
+                                <td class="px-6 py-4 text-center relative z-10">
+                                    <!-- FIX: Tombol Mata yang bisa diklik (Added type button, z-index, relative) -->
+                                    <button type="button" onclick="showDetail(${index})" class="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors shadow-sm relative z-10" title="Lihat Detail">
                                         <i class="fas fa-eye text-lg"></i>
                                     </button>
                                 </td>
@@ -1203,6 +1204,7 @@
                     }
                     if(c.noKontak) {
                         document.getElementById('no-kontak').innerText = c.noKontak;
+                        // Update link WA jika ganti nomor
                         const waLink = document.getElementById('link-wa');
                         waLink.href = "https://wa.me/" + c.noKontak.replace(/\D/g,'');
                     }
