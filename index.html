@@ -115,7 +115,12 @@
             border-radius: 2px;
         }
 
-        /* --- PRINT STYLES --- */
+                /* --- PRINT STYLES --- */
+        /* Helper: Sembunyikan elemen print di layar */
+        .print\:block { 
+            display: none; 
+        }
+
         @media print {
             @page { margin: 0; size: A4; }
             body { 
@@ -124,6 +129,12 @@
                 print-color-adjust: exact; 
             }
             
+            /* Tampilkan elemen print saat diprint */
+            .print\:block { 
+                display: block !important; 
+            }
+
+            /* Sembunyikan elemen ini saat diprint */
             nav, footer, #page-home, #page-register, #page-admin-login, #page-admin-dashboard, .no-print {
                 display: none !important;
             }
