@@ -116,21 +116,13 @@
         }
 
         /* --- PRINT STYLES --- */
-        /* Pastikan ini ada di dalam blok @media print atau umum */
-@media print {
-    .no-print { display: none !important; }
-}
-
-/* Pastikan elemen dengan print:block SAMA SEKALI tidak terlihat di layar */
-.print\:block { 
-    display: none; 
-}
-
-@media print {
-    .print\:block { 
-        display: block; 
-    }
-}
+        @media print {
+            @page { margin: 0; size: A4; }
+            body { 
+                background: white; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
             
             nav, footer, #page-home, #page-register, #page-admin-login, #page-admin-dashboard, .no-print {
                 display: none !important;
@@ -1155,93 +1147,11 @@
 
             openModal();
         }
-                // --- 7. MODAL DETAIL LOGIC (FIX UMUR & LABEL) ---
-        function showDetail(index) {
-            const siswa = databaseSiswa[index];
-            if (!siswa) return;
 
-            const getVal = (key) => siswa[key] || '-';
-
-            // Populate UI
-            const elDetailNama = document.getElementById('detail-nama');
-            const elDetailNamaPrint = document.getElementById('detail-nama-print');
-            const elDetailId = document.getElementById('detail-id');
-            const elDetailIdPrint = document.getElementById('detail-id-print');
-
-            if(elDetailNama) elDetailNama.innerText = getVal('Nama Anak');
-            if(elDetailNamaPrint) elDetailNamaPrint.innerText = getVal('Nama Anak');
-            
-            const idValue = (siswa['Timestamp'] ? new Date(siswa['Timestamp']).getTime() : index);
-            if(elDetailId) elDetailId.innerText = 'ID: ' + idValue;
-            if(elDetailIdPrint) elDetailIdPrint.innerText = 'ID: ' + idValue;
-            
-            const fotoUrl = getVal('Link Foto');
-            const imgEl = document.getElementById('detail-foto');
-            const placeholder = document.getElementById('detail-foto-placeholder');
-
-            if (fotoUrl && fotoUrl !== '-' && fotoUrl.startsWith('http')) {
-                imgEl.src = fotoUrl;
-                imgEl.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            } else {
-                imgEl.classList.add('hidden');
-                placeholder.classList.remove('hidden');
-            }
-
-            const elDetailJk = document.getElementById('detail-jk');
-            if(elDetailJk) elDetailJk.innerText = getVal('JK') === 'Laki-laki' ? 'Laki-laki' : (getVal('JK') === 'Perempuan' ? 'Perempuan' : '-');
-            
-            // Gunakan fungsi hitungUmur yang baru
-            let umurTxt = hitungUmur(getVal('Tgl Lahir'));
-            if (umurTxt !== '-') umurTxt += " Tahun";
-
-            const elDetailUmur = document.getElementById('detail-umur');
-            if(elDetailUmur) elDetailUmur.innerText = umurTxt;
-
-            const tglLahirFormatted = formatDateIndo(getVal('Tgl Lahir'));
-            const elDetailTglLahir = document.getElementById('detail-tgl-lahir');
-            if(elDetailTglLahir) elDetailTglLahir.innerText = tglLahirFormatted;
-
-            const elDetailAgama = document.getElementById('detail-agama');
-            if(elDetailAgama) elDetailAgama.innerText = getVal('Agama');
-
-            const elDetailAyah = document.getElementById('detail-ayah');
-            if(elDetailAyah) elDetailAyah.innerText = getVal('Nama Ayah');
-            
-            const elDetailIbu = document.getElementById('detail-ibu');
-            if(elDetailIbu) elDetailIbu.innerText = getVal('Nama Ibu');
-            
-            const elDetailPekAyah = document.getElementById('detail-pek-ayah');
-            if(elDetailPekAyah) elDetailPekAyah.innerText = getVal('Pek. Ayah');
-            
-            const elDetailPekIbu = document.getElementById('detail-pek-ibu');
-            if(elDetailPekIbu) elDetailPekIbu.innerText = getVal('Pek. Ibu');
-            
-            const elDetailWaText = document.getElementById('detail-wa-text');
-            if(elDetailWaText) elDetailWaText.innerText = getVal('No HP');
-            
-            const elDetailAlamat = document.getElementById('detail-alamat');
-            if(elDetailAlamat) elDetailAlamat.innerText = getVal('Alamat');
-
-            const waliNama = getVal('Nama Wali');
-            const sectionWali = document.getElementById('section-wali');
-            if (waliNama && waliNama !== '-') {
-                sectionWali.classList.remove('hidden');
-                const elDetailNamaWali = document.getElementById('detail-nama-wali');
-                if(elDetailNamaWali) elDetailNamaWali.innerText = waliNama;
-                
-                const elDetailHpWali = document.getElementById('detail-hp-wali');
-                if(elDetailHpWali) elDetailHpWali.innerText = getVal('No HP Wali');
-            } else {
-                sectionWali.classList.add('hidden');
-            }
-
-            openModal();
-        }
-
-                 // --- 8. LOAD DATA ADMIN (FIX UMUR & LABEL) ---
+        // --- 8. LOAD DATA ADMIN ---
         async function loadDataSiswa() {
             const tbody = document.getElementById('table-body');
+            
             const stats = {
                 total: document.getElementById('stat-total'),
                 lk: document.getElementById('stat-lk'),
@@ -1267,17 +1177,21 @@
                     } else {
                         data.forEach((row, index) => {
                             const namaAnak = row['Nama Anak'] || '-';
-                            const agama = row['Agama'] || ''; // Ambil murni nilai, tanpa tambahan label
+                            const agama = row['Agama'] || '';
                             const tglLahir = row['Tgl Lahir'];
                             const jk = row['JK'];
                             const namaAyah = row['Nama Ayah'] || '-';
                             const namaIbu = row['Nama Ibu'] || '-';
                             const noHp = row['No HP'] || '-';
                             
-                            // Gunakan fungsi hitungUmur yang baru
-                            let umur = hitungUmur(tglLahir);
+                            let umur = "-";
+                            if (tglLahir) {
+                                const dob = new Date(tglLahir);
+                                const diff_ms = Date.now() - dob.getTime();
+                                const age_dt = new Date(diff_ms); 
+                                umur = Math.abs(age_dt.getUTCFullYear() - 1970);
+                            }
 
-                            // Hitung statistik
                             if(jk === 'Laki-laki') countLk++;
                             if(jk === 'Perempuan') countPr++;
                             if(row['Timestamp']) {
@@ -1295,15 +1209,15 @@
                                     <div class="font-bold text-gray-800">${namaAnak}</div>
                                     <div class="text-xs text-gray-400 font-normal">${agama}</div>
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold text-brand-blue">${umur} Th</td>
+                                <td class="px-6 py-4 text-center">${umur} Th</td>
                                 <td class="px-6 py-4 text-center">
                                     <span class="px-2 py-1 text-xs rounded-full font-bold ${jk === 'Laki-laki' ? 'bg-blue-100 text-blue-600' : (jk === 'Perempuan' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-500')}">
                                         ${jk === 'Laki-laki' ? 'L' : (jk === 'Perempuan' ? 'P' : '-')}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">
-                                    <div class="font-medium">A: ${namaAyah}</div>
-                                    <div class="font-medium">I: ${namaIbu}</div>
+                                    <div>A: ${namaAyah}</div>
+                                    <div>I: ${namaIbu}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <a href="https://wa.me/${noHp.replace(/\D/g,'')}" target="_blank" class="text-green-600 hover:underline font-medium flex items-center gap-1">
@@ -1323,7 +1237,6 @@
                         });
                     }
 
-                    // Update Statistik
                     if(stats.total) stats.total.innerText = data.length;
                     if(stats.lk) stats.lk.innerText = countLk;
                     if(stats.pr) stats.pr.innerText = countPr;
@@ -1347,6 +1260,7 @@
                 `;
             }
         }
+
         // --- 9. FORM SUBMISSION ---
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('formPendaftaran');
@@ -1429,30 +1343,6 @@
                 console.log("Config fetch skipped or failed:", e);
             }
         });
-                // --- FUNGSI PENGHITUNG UMUR ROBUST ---
-        function hitungUmur(dateString) {
-            if (!dateString || dateString === '-' || dateString === '') return '-';
-            
-            let dob = new Date(dateString);
-            
-            // Jika gagal parsing pertama kali (misal format DD/MM/YYYY dianggap salah bulan)
-            if (isNaN(dob.getTime())) {
-                // Coba parsing manual untuk format DD/MM/YYYY atau DD-MM-YYYY
-                const cleanDate = dateString.replace(/-/g, '/');
-                const parts = cleanDate.split('/');
-                if (parts.length === 3) {
-                    // Coba construct ulang ke format YYYY-MM-DD
-                    dob = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                }
-            }
-
-            // Jika masih gagal, return '-'
-            if (isNaN(dob.getTime())) return '-';
-
-            const diff_ms = Date.now() - dob.getTime();
-            const age_dt = new Date(diff_ms);
-            return Math.abs(age_dt.getUTCFullYear() - 1970);
-        }
     </script>
 </body>
 </html>
